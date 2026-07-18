@@ -13,7 +13,7 @@ from starlette.middleware.sessions import SessionMiddleware
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
-from .database import get_session, init_db
+from .database import DATABASE_URL, get_session, init_db
 from .models import Asset, Ticket, User
 from .security import verify_password
 from .seed import seed
@@ -34,6 +34,8 @@ def on_startup() -> None:
     seed()
     telegram_vars = sorted(k for k in os.environ if "TELEGRAM" in k.upper())
     logging.getLogger(__name__).info("Env vars matching TELEGRAM: %s", telegram_vars)
+    logging.getLogger(__name__).info("DATABASE_URL scheme: %s", DATABASE_URL.split("://")[0])
+    logging.getLogger(__name__).info("Total env vars visible to process: %d", len(os.environ))
 
 
 def get_current_user(request: Request, session: Session) -> User | None:
