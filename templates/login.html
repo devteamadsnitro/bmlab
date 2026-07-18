@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portal de Incidencias Meta</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo-big"><i class="ti ti-brand-meta"></i></div>
+    <div class="login-title">Portal de incidencias</div>
+    <div class="login-sub">Accede para notificar un activo restringido.</div>
+    {% if error %}
+    <div class="login-error" style="display:block;"><i class="ti ti-alert-circle" style="vertical-align:-2px;margin-right:5px;"></i>{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/login">
+      <div class="field"><label>Usuario</label><input type="text" name="username" placeholder="cliente001" autocomplete="username" /></div>
+      <div class="field"><label>Contraseña</label><input type="password" name="password" placeholder="••••••••" autocomplete="current-password" /></div>
+      <button class="btn-login" type="submit">Acceder</button>
+    </form>
+    <div class="demo-hint">
+      Cuentas de demo:
+      <div class="demo-pills">
+        <div class="demo-pill" onclick="fillDemo('cliente001','1234')">cliente001 / 1234</div>
+        <div class="demo-pill" onclick="fillDemo('cliente002','abc99')">cliente002 / abc99</div>
+        <div class="demo-pill" onclick="fillDemo('admin','admin123')">admin / admin123</div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function fillDemo(u, p) {
+  document.querySelector('[name=username]').value = u;
+  document.querySelector('[name=password]').value = p;
+}
+</script>
+</body>
+</html>

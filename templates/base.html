@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{% block title %}Portal de Incidencias Meta{% endblock %}</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+{% block nav %}
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-logo"><i class="ti ti-brand-meta"></i></div>
+    <div class="nav-title">{% block nav_title %}Portal de incidencias{% endblock %}</div>
+  </div>
+  <div class="nav-right">
+    {% block nav_extra %}{% endblock %}
+    <div class="avatar {% if user.is_admin %}admin{% endif %}">{{ user.initials }}</div>
+    <form method="post" action="/logout" style="display:contents;">
+      <button class="btn-ghost" type="submit"><i class="ti ti-logout"></i></button>
+    </form>
+  </div>
+</nav>
+{% endblock %}
+{% block content %}{% endblock %}
+</body>
+</html>

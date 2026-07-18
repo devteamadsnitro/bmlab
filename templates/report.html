@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block nav_extra %}<div class="client-name">{{ user.name }}</div>{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-title">¿Qué activo está restringido?</div>
+  <div class="page-sub">Selecciona el activo afectado y pulsa <strong>Notificar</strong>. El equipo recibirá el aviso de inmediato.</div>
+  <div class="structure-label">{{ user.structure }}</div>
+  <form method="post" action="/tickets">
+    <div class="asset-list">
+      {% for asset in assets %}
+      <label class="asset-item" for="asset-{{ asset.external_id }}">
+        <input type="radio" name="asset_id" id="asset-{{ asset.external_id }}" value="{{ asset.external_id }}" required onchange="onSelect(this)" />
+        <div class="asset-icon {{ asset.type }}"><i class="ti {{ asset.icon }}"></i></div>
+        <div class="asset-text">
+          <div class="asset-name">{{ asset.label }}</div>
+          <div class="asset-type">{{ type_label(asset.type) }} · {{ asset.external_id }}</div>
+        </div>
+        <div class="check-circle"><i class="ti ti-check"></i></div>
+      </label>
+      {% endfor %}
+    </div>
+    <div class="selection-info" id="sel-info"></div>
+    <button class="btn-notify" type="submit"><i class="ti ti-send"></i> Notificar incidencia</button>
+  </form>
+</div>
+<script>
+function onSelect(input) {
+  document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
+  const item = input.closest('.asset-item');
+  item.classList.add('selected');
+  const name = item.querySelector('.asset-name').textContent;
+  document.getElementById('sel-info').innerHTML = `Vas a notificar: <span>${name}</span>`;
+}
+</script>
+{% endblock %}

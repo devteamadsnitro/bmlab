@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block nav_title %}Panel de administración{% endblock %}
+{% block content %}
+<div class="admin-tabs">
+  <div class="tab active">Tickets</div>
+  <div class="tab" style="opacity:.4;cursor:default;">Clientes</div>
+  <div class="tab" style="opacity:.4;cursor:default;">Estructuras</div>
+</div>
+<div class="stat-row">
+  <div class="stat-card"><div class="stat-label">Tickets abiertos</div><div class="stat-val">{{ stats.open }}</div></div>
+  <div class="stat-card"><div class="stat-label">BM afectados</div><div class="stat-val">{{ stats.bm }}</div></div>
+  <div class="stat-card"><div class="stat-label">Hoy</div><div class="stat-val">{{ stats.today }}</div></div>
+</div>
+<div class="tickets-wrap">
+  <div class="list-title">Últimas incidencias</div>
+  {% set badge_map = {"open": ("b-open", "Abierto"), "progress": ("b-progress", "En proceso"), "done": ("b-done", "Resuelto")} %}
+  {% set icon_map = {"bm": "ti-building-store", "page": "ti-brand-facebook", "profile": "ti-user-circle"} %}
+  {% for t in tickets %}
+  {% set badge_class, badge_label = badge_map[t.status] %}
+  <div class="ticket-row">
+    <div class="t-icon t-{{ t.asset_type }}"><i class="ti {{ icon_map[t.asset_type] }}"></i></div>
+    <div class="t-info">
+      <div class="t-client">{{ t.client_name }}</div>
+      <div class="t-asset">{{ t.asset_label }} · {{ t.asset_external_id }}</div>
+      <span class="badge {{ badge_class }}" style="margin-top:5px;display:inline-block;">{{ badge_label }}</span>
+    </div>
+    <div class="t-meta">
+      <div class="t-id">{{ t.code }}</div>
+      <div class="t-time">{{ t.created_at.strftime("%d/%m %H:%M") }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

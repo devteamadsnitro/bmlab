@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portal de Incidencias Meta</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --surface-0: #f5f5f3;
+  --surface-1: #ededea;
+  --surface-2: #ffffff;
+  --text-primary: #1a1a18;
+  --text-secondary: #6b6b68;
+  --text-muted: #9b9b98;
+  --text-danger: #a32d2d;
+  --text-success: #0f6e56;
+  --text-accent: #185fa5;
+  --border: rgba(0,0,0,0.1);
+  --border-strong: rgba(0,0,0,0.18);
+  --border-danger: #f09595;
+  --border-success: #5DCAA5;
+  --bg-danger: #fcebeb;
+  --bg-success: #e1f5ee;
+  --bg-accent: #e6f1fb;
+  --radius: 10px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-0: #1a1a18;
+    --surface-1: #242422;
+    --surface-2: #2c2c2a;
+    --text-primary: #f0efe8;
+    --text-secondary: #a8a8a3;
+    --text-muted: #6b6b68;
+    --text-danger: #f09595;
+    --text-success: #5DCAA5;
+    --text-accent: #85b7eb;
+    --border: rgba(255,255,255,0.1);
+    --border-strong: rgba(255,255,255,0.18);
+    --border-danger: #a32d2d;
+    --border-success: #0f6e56;
+    --bg-danger: #2a1010;
+    --bg-success: #062118;
+    --bg-accent: #051c33;
+  }
+}
+
+body { font-family: var(--font-sans); background: var(--surface-0); color: var(--text-primary); min-height: 100vh; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+/* NAV */
+.nav { background: var(--surface-2); border-bottom: 0.5px solid var(--border); padding: 0 1.25rem; height: 54px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-logo { width: 30px; height: 30px; background: #1877F2; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+.nav-logo i { color: white; font-size: 17px; }
+.nav-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.nav-right { display: flex; align-items: center; gap: 8px; }
+.avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-accent); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--text-accent); flex-shrink: 0; }
+.avatar.admin { background: var(--bg-danger); color: var(--text-danger); }
+.client-name { font-size: 13px; color: var(--text-secondary); }
+.btn-ghost { background: transparent; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 6px 10px; font-size: 13px; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-ghost:hover { background: var(--surface-1); }
+
+/* LOGIN */
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+.login-card { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 16px; padding: 2.5rem 2rem; width: 100%; max-width: 360px; }
+.login-logo-big { width: 52px; height: 52px; background: #1877F2; border-radius: 13px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+.login-logo-big i { color: white; font-size: 28px; }
+.login-title { font-size: 19px; font-weight: 500; color: var(--text-primary); text-align: center; margin-bottom: 6px; }
+.login-sub { font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 1.75rem; line-height: 1.5; }
+.field { margin-bottom: 1rem; }
+.field label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+.field input { width: 100%; padding: 10px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 14px; background: var(--surface-1); color: var(--text-primary); outline: none; }
+.field input:focus { border-color: #1877F2; box-shadow: 0 0 0 3px rgba(24,119,242,0.1); }
+.btn-login { background: #1877F2; border: none; border-radius: var(--radius); padding: 11px 20px; font-size: 14px; color: white; cursor: pointer; font-weight: 500; width: 100%; margin-top: 4px; }
+.btn-login:hover { background: #1565D8; }
+.login-error { font-size: 13px; color: var(--text-danger); background: var(--bg-danger); border: 0.5px solid var(--border-danger); border-radius: var(--radius); padding: 8px 12px; margin-bottom: 12px; display: none; }
+.demo-hint { margin-top: 1.25rem; font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.6; }
+.demo-pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+.demo-pill { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 11px; font-family: var(--font-mono); color: var(--text-secondary); cursor: pointer; }
+.demo-pill:hover { border-color: var(--border-strong); }
+
+/* REPORT */
+.page { padding: 1.5rem; max-width: 600px; margin: 0 auto; }
+.page-title { font-size: 18px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+.page-sub { font-size: 13px; color: var(--text-secondary); margin-bottom: 1.75rem; line-height: 1.5; }
+
+.structure-label { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+
+/* Asset cards */
+.asset-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.5rem; }
+
+.asset-item { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: border-color 0.12s, background 0.12s; user-select: none; }
+.asset-item:hover { border-color: var(--border-strong); }
+.asset-item.selected { border-color: #E24B4A; background: var(--bg-danger); }
+
+.asset-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.asset-icon.bm      { background: rgba(24,119,242,0.1); }
+.asset-icon.bm i    { color: #1877F2; font-size: 20px; }
+.asset-icon.page    { background: rgba(24,119,242,0.1); }
+.asset-icon.page i  { color: #1877F2; font-size: 20px; }
+.asset-icon.profile { background: var(--bg-accent); }
+.asset-icon.profile i { color: var(--text-accent); font-size: 20px; }
+
+.asset-item.selected .asset-icon { background: rgba(226,75,74,0.12); }
+.asset-item.selected .asset-icon i { color: #E24B4A; }
+
+.asset-text { flex: 1; min-width: 0; }
+.asset-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.asset-type { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.asset-item.selected .asset-name { color: var(--text-danger); }
+.asset-item.selected .asset-type { color: var(--text-danger); opacity: 0.7; }
+
+.check-circle { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--border-strong); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.asset-item.selected .check-circle { background: #E24B4A; border-color: #E24B4A; }
+.asset-item.selected .check-circle i { color: white; font-size: 13px; }
+.check-circle i { display: none; }
+.asset-item.selected .check-circle i { display: block; }
+
+.btn-notify { background: #E24B4A; border: none; border-radius: var(--radius); padding: 13px 20px; font-size: 15px; color: white; cursor: pointer; font-weight: 500; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-notify:hover { background: #c73b3a; }
+.btn-notify:disabled { background: var(--surface-1); color: var(--text-muted); cursor: not-allowed; border: 0.5px solid var(--border); }
+
+.selection-info { font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 10px; min-height: 20px; }
+.selection-info span { color: var(--text-danger); font-weight: 500; }
+
+/* SUCCESS */
+.success-wrap { padding: 3rem 1.5rem; text-align: center; max-width: 400px; margin: 0 auto; }
+.success-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--bg-success); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+.success-icon i { font-size: 30px; color: var(--text-success); }
+.success-title { font-size: 19px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
+.success-body { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
+.ticket-badge { display: inline-block; background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 7px 14px; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 1.75rem; font-family: var(--font-mono); letter-spacing: 0.04em; }
+.btn-back { background: transparent; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 10px 20px; font-size: 14px; color: var(--text-primary); cursor: pointer; }
+.btn-back:hover { background: var(--surface-1); }
+
+/* ADMIN */
+.admin-tabs { display: flex; border-bottom: 0.5px solid var(--border); background: var(--surface-2); padding: 0 1.5rem; }
+.tab { padding: 13px 14px; font-size: 13px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+.tab.active { color: #1877F2; border-bottom-color: #1877F2; font-weight: 500; }
+
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 1.25rem 1.5rem; }
+@media (max-width:460px) { .stat-row { grid-template-columns: 1fr 1fr; } }
+.stat-card { background: var(--surface-1); border-radius: var(--radius); padding: 1rem; }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 3px; }
+.stat-val { font-size: 24px; font-weight: 500; color: var(--text-primary); }
+
+.tickets-wrap { padding: 0 1.5rem 2rem; }
+.list-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+
+.ticket-row { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+.t-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.t-bm      { background: rgba(24,119,242,0.1); }
+.t-bm i    { color: #1877F2; font-size: 18px; }
+.t-page    { background: rgba(24,119,242,0.1); }
+.t-page i  { color: #1877F2; font-size: 18px; }
+.t-profile { background: var(--bg-accent); }
+.t-profile i { color: var(--text-accent); font-size: 18px; }
+.t-info { flex: 1; min-width: 0; }
+.t-client { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.t-asset  { font-size: 12px; color: var(--text-secondary); }
+.t-meta { text-align: right; flex-shrink: 0; }
+.t-id   { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
+.t-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.badge { display: inline-block; border-radius: 20px; padding: 2px 8px; font-size: 11px; font-weight: 500; }
+.b-open     { background: var(--bg-danger); color: var(--text-danger); }
+.b-progress { background: rgba(186,117,23,0.12); color: #854f0b; }
+.b-done     { background: var(--bg-success); color: var(--text-success); }
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- LOGIN -->
+<div class="view active" id="view-login">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo-big"><i class="ti ti-brand-meta"></i></div>
+      <div class="login-title">Portal de incidencias</div>
+      <div class="login-sub">Accede para notificar un activo restringido.</div>
+      <div class="login-error" id="login-error"><i class="ti ti-alert-circle" style="vertical-align:-2px;margin-right:5px;"></i>Usuario o contraseña incorrectos.</div>
+      <div class="field"><label>Usuario</label><input type="text" id="login-user" placeholder="cliente001" autocomplete="username" /></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" /></div>
+      <button class="btn-login" onclick="doLogin()">Acceder</button>
+      <div class="demo-hint">
+        Cuentas de demo:
+        <div class="demo-pills">
+          <div class="demo-pill" onclick="fillDemo('cliente001','1234')">cliente001 / 1234</div>
+          <div class="demo-pill" onclick="fillDemo('cliente002','abc99')">cliente002 / abc99</div>
+          <div class="demo-pill" onclick="fillDemo('admin','admin123')">admin / admin123</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENTE: REPORTE -->
+<div class="view" id="view-report">
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-logo"><i class="ti ti-brand-meta"></i></div>
+      <div class="nav-title">Portal de incidencias</div>
+    </div>
+    <div class="nav-right">
+      <div class="client-name" id="nav-name">—</div>
+      <div class="avatar" id="nav-av">—</div>
+      <button class="btn-ghost" onclick="doLogout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </nav>
+  <div class="page">
+    <div class="page-title">¿Qué activo está restringido?</div>
+    <div class="page-sub">Toca el activo afectado y pulsa <strong>Notificar</strong>. El equipo recibirá el aviso de inmediato.</div>
+    <div class="structure-label" id="struct-label">Tu estructura</div>
+    <div class="asset-list" id="asset-list"></div>
+    <div class="selection-info" id="sel-info"></div>
+    <button class="btn-notify" id="btn-notify" disabled onclick="submitReport()">
+      <i class="ti ti-send"></i> Notificar incidencia
+    </button>
+  </div>
+</div>
+
+<!-- ÉXITO -->
+<div class="view" id="view-success">
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-logo"><i class="ti ti-brand-meta"></i></div>
+      <div class="nav-title">Portal de incidencias</div>
+    </div>
+    <div class="nav-right">
+      <div class="avatar" id="nav-av-s">—</div>
+      <button class="btn-ghost" onclick="doLogout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </nav>
+  <div class="success-wrap">
+    <div class="success-icon"><i class="ti ti-circle-check"></i></div>
+    <div class="success-title">Notificación enviada</div>
+    <div class="success-body" id="success-body">El equipo ha sido avisado y gestionará la incidencia lo antes posible.</div>
+    <div class="ticket-badge" id="ticket-num">—</div><br>
+    <button class="btn-back" onclick="goBack()"><i class="ti ti-arrow-left" style="vertical-align:-2px;margin-right:4px;"></i>Volver</button>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="view" id="view-admin">
+  <nav class="nav">
+    <div class="nav-brand">
+      <div class="nav-logo"><i class="ti ti-brand-meta"></i></div>
+      <div class="nav-title">Panel de administración</div>
+    </div>
+    <div class="nav-right">
+      <div class="avatar admin">AD</div>
+      <button class="btn-ghost" onclick="doLogout()"><i class="ti ti-logout"></i></button>
+    </div>
+  </nav>
+  <div class="admin-tabs">
+    <div class="tab active">Tickets</div>
+    <div class="tab" style="opacity:.4;cursor:default;">Clientes</div>
+    <div class="tab" style="opacity:.4;cursor:default;">Estructuras</div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-label">Tickets abiertos</div><div class="stat-val" id="stat-open">—</div></div>
+    <div class="stat-card"><div class="stat-label">BM afectados</div><div class="stat-val" id="stat-bm">—</div></div>
+    <div class="stat-card"><div class="stat-label">Hoy</div><div class="stat-val" id="stat-today">—</div></div>
+  </div>
+  <div class="tickets-wrap">
+    <div class="list-title">Últimas incidencias</div>
+    <div id="admin-list"></div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+/* ── DATOS ──────────────────────────────────────────────── */
+const USERS = {
+  'cliente001': {
+    pass: '1234',
+    name: 'Moda Trends SL',
+    initials: 'MT',
+    structure: 'Estructura A',
+    assets: [
+      { id:'BM-001', label:'Business Manager principal', type:'bm',      icon:'ti-building-store' },
+      { id:'PF-001', label:'Perfil · Juan García',       type:'profile', icon:'ti-user-circle' },
+      { id:'PF-002', label:'Perfil · Ana Ruiz',          type:'profile', icon:'ti-user-circle' },
+      { id:'PF-003', label:'Perfil · Carlos López',      type:'profile', icon:'ti-user-circle' },
+      { id:'FP-001', label:'Fan Page · Moda Trends',     type:'page',    icon:'ti-brand-facebook' },
+    ]
+  },
+  'cliente002': {
+    pass: 'abc99',
+    name: 'Suplementos Plus',
+    initials: 'SP',
+    structure: 'Estructura B',
+    assets: [
+      { id:'BM-002', label:'Business Manager principal', type:'bm',      icon:'ti-building-store' },
+      { id:'PF-004', label:'Perfil · María Torres',      type:'profile', icon:'ti-user-circle' },
+      { id:'PF-005', label:'Perfil · Luis Sánchez',      type:'profile', icon:'ti-user-circle' },
+      { id:'FP-002', label:'Fan Page · Suplementos Plus',type:'page',    icon:'ti-brand-facebook' },
+    ]
+  },
+  'admin': { pass: 'admin123', isAdmin: true }
+};
+
+let tickets = [
+  { id:'INC-0031', client:'Moda Trends SL',  assetId:'BM-001', assetLabel:'Business Manager principal', type:'bm',      status:'open',     time:'hace 12 min' },
+  { id:'INC-0030', client:'Suplementos Plus', assetId:'FP-002', assetLabel:'Fan Page · Suplementos Plus',type:'page',    status:'progress', time:'hace 2h' },
+  { id:'INC-0029', client:'Moda Trends SL',  assetId:'PF-002', assetLabel:'Perfil · Ana Ruiz',          type:'profile', status:'done',     time:'hace 1d' },
+];
+
+/* ── ESTADO ─────────────────────────────────────────────── */
+let currentUser = null;
+let selectedAssetId = null;
+
+/* ── HELPERS ────────────────────────────────────────────── */
+function show(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function fillDemo(u, p) {
+  document.getElementById('login-user').value = u;
+  document.getElementById('login-pass').value = p;
+}
+
+/* ── LOGIN ──────────────────────────────────────────────── */
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  const user = USERS[u];
+  if (user && user.pass === p) {
+    currentUser = { username: u, ...user };
+    err.style.display = 'none';
+    if (currentUser.isAdmin) { renderAdmin(); show('view-admin'); }
+    else { renderReport(); show('view-report'); }
+  } else {
+    err.style.display = 'block';
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  currentUser = null; selectedAssetId = null;
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  show('view-login');
+}
+
+/* ── REPORTE ────────────────────────────────────────────── */
+function renderReport() {
+  document.getElementById('nav-name').textContent = currentUser.name;
+  document.getElementById('nav-av').textContent   = currentUser.initials;
+  document.getElementById('struct-label').textContent = currentUser.structure;
+  selectedAssetId = null;
+  document.getElementById('sel-info').innerHTML = '';
+  document.getElementById('btn-notify').disabled = true;
+
+  const list = document.getElementById('asset-list');
+  list.innerHTML = currentUser.assets.map(a => `
+    <div class="asset-item" id="ai-${a.id}" onclick="selectAsset('${a.id}')">
+      <div class="asset-icon ${a.type}"><i class="ti ${a.icon}"></i></div>
+      <div class="asset-text">
+        <div class="asset-name">${a.label}</div>
+        <div class="asset-type">${typeLabel(a.type)} · ${a.id}</div>
+      </div>
+      <div class="check-circle"><i class="ti ti-check"></i></div>
+    </div>
+  `).join('');
+}
+
+function typeLabel(t) {
+  return { bm:'Business Manager', page:'Fan Page', profile:'Perfil personal' }[t] || t;
+}
+
+function selectAsset(id) {
+  selectedAssetId = id;
+  document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
+  document.getElementById('ai-'+id).classList.add('selected');
+  const asset = currentUser.assets.find(a => a.id === id);
+  document.getElementById('sel-info').innerHTML = `Vas a notificar: <span>${asset.label}</span>`;
+  document.getElementById('btn-notify').disabled = false;
+}
+
+function submitReport() {
+  if (!selectedAssetId) return;
+  const asset = currentUser.assets.find(a => a.id === selectedAssetId);
+  const ticketId = 'INC-00' + String(tickets.length + 32).padStart(2,'0');
+  tickets.unshift({
+    id: ticketId,
+    client: currentUser.name,
+    assetId: asset.id,
+    assetLabel: asset.label,
+    type: asset.type,
+    status: 'open',
+    time: 'ahora'
+  });
+  document.getElementById('ticket-num').textContent = ticketId;
+  document.getElementById('nav-av-s').textContent   = currentUser.initials;
+  document.getElementById('success-body').innerHTML =
+    `<strong>${asset.label}</strong> ha sido reportado como restringido. El equipo gestionará la incidencia lo antes posible.`;
+  show('view-success');
+}
+
+function goBack() {
+  selectedAssetId = null;
+  renderReport();
+  show('view-report');
+}
+
+/* ── ADMIN ──────────────────────────────────────────────── */
+function renderAdmin() {
+  const open  = tickets.filter(t => t.status === 'open').length;
+  const bm    = tickets.filter(t => t.type === 'bm' && t.status !== 'done').length;
+  const today = tickets.filter(t => t.time === 'ahora' || t.time.includes('min')).length;
+  document.getElementById('stat-open').textContent  = open;
+  document.getElementById('stat-bm').textContent    = bm;
+  document.getElementById('stat-today').textContent = today;
+
+  const typeIcon = { bm:'ti-building-store', page:'ti-brand-facebook', profile:'ti-user-circle' };
+  const stMap    = { open:['b-open','Abierto'], progress:['b-progress','En proceso'], done:['b-done','Resuelto'] };
+
+  document.getElementById('admin-list').innerHTML = tickets.map(t => {
+    const [sc, sl] = stMap[t.status];
+    return `<div class="ticket-row">
+      <div class="t-icon t-${t.type}"><i class="ti ${typeIcon[t.type]}"></i></div>
+      <div class="t-info">
+        <div class="t-client">${t.client}</div>
+        <div class="t-asset">${t.assetLabel} · ${t.assetId}</div>
+        <span class="badge ${sc}" style="margin-top:5px;display:inline-block;">${sl}</span>
+      </div>
+      <div class="t-meta">
+        <div class="t-id">${t.id}</div>
+        <div class="t-time">${t.time}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
