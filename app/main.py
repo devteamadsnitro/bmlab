@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime, timezone
 
@@ -10,6 +11,7 @@ from sqlmodel import Session, select
 from starlette.middleware.sessions import SessionMiddleware
 
 load_dotenv()
+logging.basicConfig(level=logging.INFO)
 
 from .database import get_session, init_db
 from .models import Asset, Ticket, User

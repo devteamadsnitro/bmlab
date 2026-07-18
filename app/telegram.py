@@ -11,7 +11,7 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 async def send_ticket_notification(ticket) -> None:
     if not BOT_TOKEN or not CHAT_ID:
-        logger.info("Telegram not configured; skipping notification for %s", ticket.code)
+        logger.warning("Telegram not configured; skipping notification for %s", ticket.code)
         return
 
     text = (
@@ -23,6 +23,9 @@ async def send_ticket_notification(ticket) -> None:
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             resp = await client.post(url, json={"chat_id": CHAT_ID, "text": text})
-            resp.raise_for_status()
+        if resp.status_code != 200 or not resp.json().get("ok"):
+            logger.error("Telegram send failed for %s: %s %s", ticket.code, resp.status_code, resp.text)
+        else:
+            logger.info("Telegram notification sent for %s", ticket.code)
     except httpx.HTTPError:
-        logger.exception("Failed to send Telegram notification for %s", ticket.code)
+        logger.exception("Telegram request errored for %s", ticket.code)
