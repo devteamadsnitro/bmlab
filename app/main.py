@@ -32,6 +32,8 @@ templates.env.globals["type_label"] = lambda t: TYPE_LABELS.get(t, t)
 def on_startup() -> None:
     init_db()
     seed()
+    telegram_vars = sorted(k for k in os.environ if "TELEGRAM" in k.upper())
+    logging.getLogger(__name__).info("Env vars matching TELEGRAM: %s", telegram_vars)
 
 
 def get_current_user(request: Request, session: Session) -> User | None:
