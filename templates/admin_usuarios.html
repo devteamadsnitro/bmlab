@@ -47,14 +47,27 @@
           data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
           <i class="ti ti-pencil"></i>
         </button>
-        <button class="btn-add-structure" type="button" title="Agregar estructura">
+        <button class="btn-add-structure" type="button" title="Agregar estructura" onclick="openNewEstructura(this)" data-user-id="{{ u.id }}">
           <i class="ti ti-plus"></i> Estructura
         </button>
-        <button class="btn-caret" type="button" title="Más opciones">
+        <button class="btn-caret" type="button" title="Mostrar estructuras" onclick="toggleEstructuras(this, {{ u.id }})">
           <i class="ti ti-caret-down"></i>
         </button>
       </div>
     </div>
+  </div>
+  <div class="u-estructuras" id="estructuras-{{ u.id }}" style="display:none;">
+    {% for a in u.assets %}
+    <div class="estructura-row">
+      <div class="e-icon {{ a.type }}"><i class="ti {{ asset_icon(a.type) }}"></i></div>
+      <div class="e-info">
+        <div class="e-name">{{ a.label }}</div>
+        <div class="e-type">{{ type_label(a.type) }} · {{ a.external_id }}</div>
+      </div>
+    </div>
+    {% else %}
+    <p class="usuarios-empty">Sin estructuras todavía.</p>
+    {% endfor %}
   </div>
   {% else %}
   <p class="usuarios-empty">No hay usuarios en esta categoría todavía.</p>
@@ -90,6 +103,27 @@
   </form>
 </dialog>
 
+<dialog id="new-estructura-dialog" class="user-dialog">
+  <form id="new-estructura-form" method="post" action="">
+    <input type="hidden" name="tipo" value="{{ tipo }}" />
+    <div class="dialog-title">Nueva estructura</div>
+    <div class="field"><label>Nombre</label><input type="text" name="nombre" required /></div>
+    <div class="field">
+      <label>Activo</label>
+      <select name="activo" required>
+        <option value="bm">Business Manager</option>
+        <option value="profile">Perfil</option>
+        <option value="page">Fan Page</option>
+      </select>
+    </div>
+    <div class="field"><label>Código</label><input type="text" name="codigo" required /></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-back" onclick="document.getElementById('new-estructura-dialog').close()">Cancelar</button>
+      <button type="submit" class="btn-login" style="margin-top:0;">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 function copyText(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
@@ -116,6 +150,17 @@ function openEdit(btn) {
   document.getElementById('edit-password').value = d.password;
   document.getElementById('edit-user-form').action = '/admin/usuarios/' + d.id + '/edit';
   document.getElementById('edit-user-dialog').showModal();
+}
+function openNewEstructura(btn) {
+  document.getElementById('new-estructura-form').action = '/admin/usuarios/' + btn.dataset.userId + '/estructuras';
+  document.getElementById('new-estructura-form').reset();
+  document.getElementById('new-estructura-dialog').showModal();
+}
+function toggleEstructuras(btn, userId) {
+  const el = document.getElementById('estructuras-' + userId);
+  const willShow = el.style.display === 'none';
+  el.style.display = willShow ? '' : 'none';
+  btn.classList.toggle('open', willShow);
 }
 {% if error %}
 document.getElementById('new-user-dialog').showModal();

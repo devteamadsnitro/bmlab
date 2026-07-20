@@ -26,7 +26,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 TYPE_LABELS = {"bm": "Business Manager", "page": "Fan Page", "profile": "Perfil personal"}
+TYPE_ICONS = {"bm": "ti-building-store", "page": "ti-brand-facebook", "profile": "ti-user-circle"}
 templates.env.globals["type_label"] = lambda t: TYPE_LABELS.get(t, t)
+templates.env.globals["asset_icon"] = lambda t: TYPE_ICONS.get(t, "ti-building-store")
 templates.env.globals["asset_version"] = str(int(datetime.now(timezone.utc).timestamp()))
 
 
@@ -164,7 +166,13 @@ def _usuarios_context(request: Request, user: User, session: Session, tipo: str,
     want_admin = tipo == "administradores"
     rows = session.exec(select(User).where(User.is_admin == want_admin)).all()
     usuarios = [
-        {"id": u.id, "name": u.name, "username": u.username, "password": decrypt_password(u.password_encrypted)}
+        {
+            "id": u.id,
+            "name": u.name,
+            "username": u.username,
+            "password": decrypt_password(u.password_encrypted),
+            "assets": session.exec(select(Asset).where(Asset.owner_id == u.id)).all(),
+        }
         for u in rows
     ]
     return {
@@ -221,6 +229,37 @@ def admin_usuarios_create(
             ),
             status_code=400,
         )
+
+    return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
+
+
+@app.post("/admin/usuarios/{user_id}/estructuras")
+def admin_usuarios_add_estructura(
+    user_id: int,
+    request: Request,
+    tipo: str = Form(...),
+    nombre: str = Form(...),
+    activo: str = Form(...),
+    codigo: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    admin_user = get_current_user(request, session)
+    if not admin_user or not admin_user.is_admin:
+        return RedirectResponse("/login", status_code=303)
+
+    target = session.get(User, user_id)
+    if not target:
+        return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
+
+    asset = Asset(
+        external_id=codigo,
+        label=nombre,
+        type=activo,
+        icon=TYPE_ICONS.get(activo, "ti-building-store"),
+        owner_id=target.id,
+    )
+    session.add(asset)
+    session.commit()
 
     return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
 
