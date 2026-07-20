@@ -196,7 +196,7 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .btn-edit:hover { background: var(--surface-1); color: var(--text-accent); border-color: var(--text-accent); }
 .btn-edit i { font-size: 14px; }
 
-.user-dialog { border: 0.5px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 340px; background: var(--surface-2); color: var(--text-primary); }
+.user-dialog { margin: auto; border: 0.5px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 340px; background: var(--surface-2); color: var(--text-primary); }
 .user-dialog::backdrop { background: rgba(0,0,0,0.4); }
 .dialog-title { font-size: 17px; font-weight: 500; margin-bottom: 1.25rem; }
 .dialog-actions { display: flex; gap: 8px; margin-top: 4px; }
