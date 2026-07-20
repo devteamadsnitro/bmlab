@@ -170,7 +170,8 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .btn-add-user { background: #1877F2; border: none; border-radius: var(--radius); padding: 9px 16px; font-size: 13px; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: auto; }
 .btn-add-user:hover { background: #1565D8; }
 
-.usuarios-search { display: flex; align-items: center; gap: 8px; margin: 1.25rem 1.5rem 0; padding: 9px 12px; background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: var(--radius); }
+.usuarios-search-row { display: flex; align-items: center; gap: 12px; margin: 1.25rem 1.5rem 0; }
+.usuarios-search { flex: 1; display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: var(--radius); }
 .usuarios-search i { color: var(--text-muted); font-size: 15px; flex-shrink: 0; }
 .usuarios-search input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; color: var(--text-primary); font-family: var(--font-sans); }
 .usuarios-search input::placeholder { color: var(--text-muted); }
@@ -192,6 +193,7 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 
 .u-meta { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .u-id { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
+.u-actions { display: flex; align-items: center; gap: 6px; }
 
 .btn-copy { background: transparent; border: none; border-radius: 6px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
 .btn-copy:hover { background: var(--surface-1); color: var(--text-accent); }
@@ -200,6 +202,14 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .btn-edit { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 8px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
 .btn-edit:hover { background: var(--surface-1); color: var(--text-accent); border-color: var(--text-accent); }
 .btn-edit i { font-size: 14px; }
+
+.btn-add-structure { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 8px; height: 28px; padding: 0 10px; display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+.btn-add-structure:hover { background: var(--surface-1); color: var(--text-accent); border-color: var(--text-accent); }
+.btn-add-structure i { font-size: 13px; }
+
+.btn-caret { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 8px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
+.btn-caret:hover { background: var(--surface-1); color: var(--text-accent); border-color: var(--text-accent); }
+.btn-caret i { font-size: 13px; }
 
 .user-dialog { margin: auto; border: 0.5px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 340px; background: var(--surface-2); color: var(--text-primary); }
 .user-dialog::backdrop { background: rgba(0,0,0,0.4); }

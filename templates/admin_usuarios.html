@@ -8,18 +8,20 @@
     <a class="tab {% if tipo == 'clientes' %}active{% endif %}" href="/admin/usuarios?tipo=clientes">Clientes</a>
     <a class="tab {% if tipo == 'administradores' %}active{% endif %}" href="/admin/usuarios?tipo=administradores">Administradores</a>
   </div>
-  <button class="btn-add-user" onclick="document.getElementById('new-user-dialog').showModal()">
-    <i class="ti ti-user-plus"></i> Nuevo usuario
-  </button>
 </div>
 
 {% if error %}
 <div class="login-error" style="display:block;margin:0 1.5rem 1rem;">{{ error }}</div>
 {% endif %}
 
-<div class="usuarios-search">
-  <i class="ti ti-search"></i>
-  <input type="text" id="usuarios-search-input" placeholder="Buscar por nombre o cuenta..." oninput="filterUsuarios(this.value)" />
+<div class="usuarios-search-row">
+  <div class="usuarios-search">
+    <i class="ti ti-search"></i>
+    <input type="text" id="usuarios-search-input" placeholder="Buscar por nombre o cuenta..." oninput="filterUsuarios(this.value)" />
+  </div>
+  <button class="btn-add-user" onclick="document.getElementById('new-user-dialog').showModal()">
+    <i class="ti ti-user-plus"></i> Nuevo usuario
+  </button>
 </div>
 
 <div class="usuarios-list">
@@ -40,10 +42,18 @@
     </div>
     <div class="u-meta">
       <div class="u-id">#{{ u.id }}</div>
-      <button class="btn-edit" type="button" title="Editar usuario" onclick="openEdit(this)"
-        data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
-        <i class="ti ti-pencil"></i>
-      </button>
+      <div class="u-actions">
+        <button class="btn-edit" type="button" title="Editar usuario" onclick="openEdit(this)"
+          data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
+          <i class="ti ti-pencil"></i>
+        </button>
+        <button class="btn-add-structure" type="button" title="Agregar estructura">
+          <i class="ti ti-plus"></i> Estructura
+        </button>
+        <button class="btn-caret" type="button" title="Más opciones">
+          <i class="ti ti-caret-down"></i>
+        </button>
+      </div>
     </div>
   </div>
   {% else %}
