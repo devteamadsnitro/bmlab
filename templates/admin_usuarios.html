@@ -17,10 +17,15 @@
 <div class="login-error" style="display:block;margin:0 1.5rem 1rem;">{{ error }}</div>
 {% endif %}
 
+<div class="usuarios-search">
+  <i class="ti ti-search"></i>
+  <input type="text" id="usuarios-search-input" placeholder="Buscar por nombre o cuenta..." oninput="filterUsuarios(this.value)" />
+</div>
+
 <div class="usuarios-list">
   {% set icon_class = "u-admin" if tipo == "administradores" else "u-cliente" %}
   {% for u in usuarios %}
-  <div class="user-row">
+  <div class="user-row" data-search="{{ (u.name ~ ' ' ~ u.username)|lower }}">
     <div class="u-icon {{ icon_class }}"><i class="ti ti-user"></i></div>
     <div class="u-info">
       <div class="u-name">{{ u.name }}</div>
@@ -45,6 +50,7 @@
   <p class="usuarios-empty">No hay usuarios en esta categoría todavía.</p>
   {% endfor %}
 </div>
+<p id="usuarios-no-match" class="usuarios-empty" style="display:none;">Sin resultados para tu búsqueda.</p>
 
 <dialog id="new-user-dialog" class="user-dialog">
   <form method="post" action="/admin/usuarios">
@@ -81,6 +87,17 @@ function copyText(text, btn) {
     icon.className = 'ti ti-check';
     setTimeout(() => { icon.className = 'ti ti-copy'; }, 1200);
   });
+}
+function filterUsuarios(query) {
+  const q = query.trim().toLowerCase();
+  let anyVisible = false;
+  document.querySelectorAll('.user-row').forEach(row => {
+    const match = row.dataset.search.includes(q);
+    row.style.display = match ? '' : 'none';
+    if (match) anyVisible = true;
+  });
+  const noMatch = document.getElementById('usuarios-no-match');
+  if (noMatch) noMatch.style.display = (q && !anyVisible) ? 'block' : 'none';
 }
 function openEdit(btn) {
   const d = btn.dataset;
