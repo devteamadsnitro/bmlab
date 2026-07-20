@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block nav_title %}Panel de administración{% endblock %}
+{% block content %}
+{% include "_admin_tabs.html" %}
+
+<div class="usuarios-toolbar">
+  <div class="sub-tab-group">
+    <a class="sub-tab {% if tipo == 'clientes' %}active{% endif %}" href="/admin/usuarios?tipo=clientes">Clientes</a>
+    <a class="sub-tab {% if tipo == 'administradores' %}active{% endif %}" href="/admin/usuarios?tipo=administradores">Administradores</a>
+  </div>
+  <button class="btn-add-user" onclick="document.getElementById('new-user-dialog').showModal()">
+    <i class="ti ti-user-plus"></i> Nuevo usuario
+  </button>
+</div>
+
+{% if error %}
+<div class="login-error" style="display:block;margin:0 1.5rem 1rem;">{{ error }}</div>
+{% endif %}
+
+<div class="usuarios-list">
+  {% for u in usuarios %}
+  <div class="user-row">
+    <div class="user-id">#{{ u.id }}</div>
+    <div class="user-info">
+      <div class="user-name">{{ u.name }}</div>
+      <div class="user-field">
+        <span>Cuenta: <span class="mono">{{ u.username }}</span></span>
+        <button class="btn-copy" type="button" onclick="copyText('{{ u.username }}', this)"><i class="ti ti-copy"></i></button>
+      </div>
+      <div class="user-field">
+        <span>Contraseña: <span class="mono">{{ u.password }}</span></span>
+        <button class="btn-copy" type="button" onclick="copyText('{{ u.password }}', this)"><i class="ti ti-copy"></i></button>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p class="usuarios-empty">No hay usuarios en esta categoría todavía.</p>
+  {% endfor %}
+</div>
+
+<dialog id="new-user-dialog" class="user-dialog">
+  <form method="post" action="/admin/usuarios">
+    <input type="hidden" name="tipo" value="{{ tipo }}" />
+    <div class="dialog-title">Nuevo {{ "administrador" if tipo == "administradores" else "cliente" }}</div>
+    <div class="field"><label>Nombre</label><input type="text" name="nombre" value="{{ form_nombre or '' }}" required /></div>
+    <div class="field"><label>Cuenta</label><input type="email" name="cuenta" value="{{ form_cuenta or '' }}" required /></div>
+    <div class="field"><label>Contraseña</label><input type="text" name="password" required /></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-back" onclick="document.getElementById('new-user-dialog').close()">Cancelar</button>
+      <button type="submit" class="btn-login" style="margin-top:0;">Crear</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    const icon = btn.querySelector('i');
+    icon.className = 'ti ti-check';
+    setTimeout(() => { icon.className = 'ti ti-copy'; }, 1200);
+  });
+}
+{% if error %}
+document.getElementById('new-user-dialog').showModal();
+{% endif %}
+</script>
+{% endblock %}

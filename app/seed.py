@@ -2,7 +2,7 @@ from sqlmodel import Session, select
 
 from .database import engine
 from .models import Asset, Ticket, User
-from .security import hash_password
+from .security import encrypt_password
 
 
 def seed() -> None:
@@ -12,21 +12,21 @@ def seed() -> None:
 
         moda = User(
             username="cliente001",
-            password_hash=hash_password("1234"),
+            password_encrypted=encrypt_password("1234"),
             name="Moda Trends SL",
             initials="MT",
             structure="Estructura A",
         )
         supl = User(
             username="cliente002",
-            password_hash=hash_password("abc99"),
+            password_encrypted=encrypt_password("abc99"),
             name="Suplementos Plus",
             initials="SP",
             structure="Estructura B",
         )
         admin = User(
             username="admin",
-            password_hash=hash_password("admin123"),
+            password_encrypted=encrypt_password("admin123"),
             name="Administrador",
             initials="AD",
             is_admin=True,

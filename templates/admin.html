@@ -1,11 +1,7 @@
 {% extends "base.html" %}
 {% block nav_title %}Panel de administración{% endblock %}
 {% block content %}
-<div class="admin-tabs">
-  <div class="tab active">Tickets</div>
-  <div class="tab" style="opacity:.4;cursor:default;">Clientes</div>
-  <div class="tab" style="opacity:.4;cursor:default;">Estructuras</div>
-</div>
+{% include "_admin_tabs.html" %}
 <div class="stat-row">
   <div class="stat-card"><div class="stat-label">Tickets abiertos</div><div class="stat-val">{{ stats.open }}</div></div>
   <div class="stat-card"><div class="stat-label">BM afectados</div><div class="stat-val">{{ stats.bm }}</div></div>

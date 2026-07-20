@@ -1,9 +1,17 @@
-import bcrypt
+import os
+
+from cryptography.fernet import Fernet
+
+_fernet = Fernet(os.environ["PASSWORD_ENCRYPTION_KEY"])
 
 
-def hash_password(raw: str) -> str:
-    return bcrypt.hashpw(raw.encode(), bcrypt.gensalt()).decode()
+def encrypt_password(raw: str) -> str:
+    return _fernet.encrypt(raw.encode()).decode()
 
 
-def verify_password(raw: str, hashed: str) -> bool:
-    return bcrypt.checkpw(raw.encode(), hashed.encode())
+def decrypt_password(encrypted: str) -> str:
+    return _fernet.decrypt(encrypted.encode()).decode()
+
+
+def verify_password(raw: str, encrypted: str) -> bool:
+    return decrypt_password(encrypted) == raw

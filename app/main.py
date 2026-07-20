@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -15,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 from .database import DATABASE_URL, get_session, init_db
 from .models import Asset, Ticket, User
-from .security import verify_password
+from .security import decrypt_password, encrypt_password, verify_password
 from .seed import seed
 from .telegram import send_ticket_notification
 
@@ -76,7 +77,7 @@ def login_submit(
     session: Session = Depends(get_session),
 ):
     user = session.exec(select(User).where(User.username == username)).first()
-    if not user or not verify_password(password, user.password_hash):
+    if not user or not verify_password(password, user.password_encrypted):
         return templates.TemplateResponse(
             "login.html",
             {"request": request, "error": "Usuario o contraseña incorrectos."},
@@ -151,5 +152,73 @@ def admin(request: Request, session: Session = Depends(get_session)):
         "today": sum(1 for t in tickets if t.created_at.date() == today),
     }
     return templates.TemplateResponse(
-        "admin.html", {"request": request, "user": user, "tickets": tickets, "stats": stats}
+        "admin.html",
+        {"request": request, "user": user, "tickets": tickets, "stats": stats, "active_tab": "tickets"},
     )
+
+
+def _usuarios_context(request: Request, user: User, session: Session, tipo: str, **extra):
+    if tipo not in ("clientes", "administradores"):
+        tipo = "clientes"
+    want_admin = tipo == "administradores"
+    rows = session.exec(select(User).where(User.is_admin == want_admin)).all()
+    usuarios = [
+        {"id": u.id, "name": u.name, "username": u.username, "password": decrypt_password(u.password_encrypted)}
+        for u in rows
+    ]
+    return {
+        "request": request,
+        "user": user,
+        "active_tab": "usuarios",
+        "tipo": tipo,
+        "usuarios": usuarios,
+        **extra,
+    }
+
+
+@app.get("/admin/usuarios")
+def admin_usuarios(request: Request, tipo: str = "clientes", session: Session = Depends(get_session)):
+    user = get_current_user(request, session)
+    if not user or not user.is_admin:
+        return RedirectResponse("/login")
+    return templates.TemplateResponse(
+        "admin_usuarios.html", _usuarios_context(request, user, session, tipo)
+    )
+
+
+@app.post("/admin/usuarios")
+def admin_usuarios_create(
+    request: Request,
+    tipo: str = Form(...),
+    nombre: str = Form(...),
+    cuenta: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    user = get_current_user(request, session)
+    if not user or not user.is_admin:
+        return RedirectResponse("/login", status_code=303)
+
+    initials = "".join(part[0] for part in nombre.split()[:2]).upper() or "US"
+    nuevo = User(
+        username=cuenta,
+        password_encrypted=encrypt_password(password),
+        name=nombre,
+        initials=initials,
+        is_admin=(tipo == "administradores"),
+    )
+    session.add(nuevo)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        return templates.TemplateResponse(
+            "admin_usuarios.html",
+            _usuarios_context(
+                request, user, session, tipo,
+                error="Esa cuenta ya está en uso.", form_nombre=nombre, form_cuenta=cuenta,
+            ),
+            status_code=400,
+        )
+
+    return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)

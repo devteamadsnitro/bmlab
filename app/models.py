@@ -7,7 +7,7 @@ from sqlmodel import Field, Relationship, SQLModel
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     username: str = Field(unique=True, index=True)
-    password_hash: str
+    password_encrypted: str
     name: str
     initials: str
     structure: str = ""

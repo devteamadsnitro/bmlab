@@ -132,7 +132,7 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 
 /* ADMIN */
 .admin-tabs { display: flex; border-bottom: 0.5px solid var(--border); background: var(--surface-2); padding: 0 1.5rem; }
-.tab { padding: 13px 14px; font-size: 13px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; }
+.tab { padding: 13px 14px; font-size: 13px; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -0.5px; text-decoration: none; }
 .tab.active { color: #1877F2; border-bottom-color: #1877F2; font-weight: 500; }
 
 .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 1.25rem 1.5rem; }
@@ -162,3 +162,33 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .b-open     { background: var(--bg-danger); color: var(--text-danger); }
 .b-progress { background: rgba(186,117,23,0.12); color: #854f0b; }
 .b-done     { background: var(--bg-success); color: var(--text-success); }
+
+/* USUARIOS */
+.usuarios-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem 1rem; gap: 1rem; flex-wrap: wrap; }
+.sub-tab-group { display: flex; gap: 6px; }
+.sub-tab { font-size: 13px; color: var(--text-secondary); text-decoration: none; padding: 7px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong); }
+.sub-tab:hover { background: var(--surface-1); }
+.sub-tab.active { background: #1877F2; border-color: #1877F2; color: white; font-weight: 500; }
+
+.btn-add-user { background: #1877F2; border: none; border-radius: var(--radius); padding: 9px 16px; font-size: 13px; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.btn-add-user:hover { background: #1565D8; }
+
+.usuarios-list { padding: 0 1.5rem 2rem; display: flex; flex-direction: column; gap: 8px; }
+.usuarios-empty { color: var(--text-secondary); font-size: 13px; }
+
+.user-row { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 14px; }
+.user-id { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); flex-shrink: 0; padding-top: 2px; }
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+.user-field { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.user-field .mono { font-family: var(--font-mono); color: var(--text-primary); }
+
+.btn-copy { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
+.btn-copy:hover { background: var(--surface-1); }
+.btn-copy i { font-size: 13px; }
+
+.user-dialog { border: 0.5px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 340px; background: var(--surface-2); color: var(--text-primary); }
+.user-dialog::backdrop { background: rgba(0,0,0,0.4); }
+.dialog-title { font-size: 17px; font-weight: 500; margin-bottom: 1.25rem; }
+.dialog-actions { display: flex; gap: 8px; margin-top: 4px; }
+.dialog-actions button { flex: 1; }
