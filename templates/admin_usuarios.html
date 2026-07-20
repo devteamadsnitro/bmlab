@@ -20,18 +20,27 @@
 <div class="usuarios-list">
   {% for u in usuarios %}
   <div class="user-row">
-    <div class="user-id">#{{ u.id }}</div>
+    <div class="user-avatar">{{ u.name[:2].upper() }}</div>
     <div class="user-info">
       <div class="user-name">{{ u.name }}</div>
-      <div class="user-field">
-        <span>Cuenta: <span class="mono">{{ u.username }}</span></span>
-        <button class="btn-copy" type="button" onclick="copyText('{{ u.username }}', this)"><i class="ti ti-copy"></i></button>
+      <div class="user-id">ID #{{ u.id }}</div>
+    </div>
+    <div class="user-creds">
+      <div class="cred-chip">
+        <i class="ti ti-mail"></i>
+        <span class="mono">{{ u.username }}</span>
+        <button class="btn-copy" type="button" title="Copiar cuenta" onclick="copyText('{{ u.username }}', this)"><i class="ti ti-copy"></i></button>
       </div>
-      <div class="user-field">
-        <span>Contraseña: <span class="mono">{{ u.password }}</span></span>
-        <button class="btn-copy" type="button" onclick="copyText('{{ u.password }}', this)"><i class="ti ti-copy"></i></button>
+      <div class="cred-chip">
+        <i class="ti ti-lock"></i>
+        <span class="mono">{{ u.password }}</span>
+        <button class="btn-copy" type="button" title="Copiar contraseña" onclick="copyText('{{ u.password }}', this)"><i class="ti ti-copy"></i></button>
       </div>
     </div>
+    <button class="btn-edit" type="button" title="Editar usuario" onclick="openEdit(this)"
+      data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
+      <i class="ti ti-pencil"></i>
+    </button>
   </div>
   {% else %}
   <p class="usuarios-empty">No hay usuarios en esta categoría todavía.</p>
@@ -52,6 +61,20 @@
   </form>
 </dialog>
 
+<dialog id="edit-user-dialog" class="user-dialog">
+  <form id="edit-user-form" method="post" action="">
+    <input type="hidden" name="tipo" id="edit-user-tipo" value="{{ tipo }}" />
+    <div class="dialog-title">Editar usuario</div>
+    <div class="field"><label>Nombre</label><input type="text" name="nombre" id="edit-nombre" required /></div>
+    <div class="field"><label>Cuenta</label><input type="email" name="cuenta" id="edit-cuenta" required /></div>
+    <div class="field"><label>Contraseña</label><input type="text" name="password" id="edit-password" required /></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-back" onclick="document.getElementById('edit-user-dialog').close()">Cancelar</button>
+      <button type="submit" class="btn-login" style="margin-top:0;">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 function copyText(text, btn) {
   navigator.clipboard.writeText(text).then(() => {
@@ -59,6 +82,14 @@ function copyText(text, btn) {
     icon.className = 'ti ti-check';
     setTimeout(() => { icon.className = 'ti ti-copy'; }, 1200);
   });
+}
+function openEdit(btn) {
+  const d = btn.dataset;
+  document.getElementById('edit-nombre').value = d.name;
+  document.getElementById('edit-cuenta').value = d.username;
+  document.getElementById('edit-password').value = d.password;
+  document.getElementById('edit-user-form').action = '/admin/usuarios/' + d.id + '/edit';
+  document.getElementById('edit-user-dialog').showModal();
 }
 {% if error %}
 document.getElementById('new-user-dialog').showModal();

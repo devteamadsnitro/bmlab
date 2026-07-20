@@ -222,3 +222,39 @@ def admin_usuarios_create(
         )
 
     return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
+
+
+@app.post("/admin/usuarios/{user_id}/edit")
+def admin_usuarios_edit(
+    user_id: int,
+    request: Request,
+    tipo: str = Form(...),
+    nombre: str = Form(...),
+    cuenta: str = Form(...),
+    password: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    admin_user = get_current_user(request, session)
+    if not admin_user or not admin_user.is_admin:
+        return RedirectResponse("/login", status_code=303)
+
+    target = session.get(User, user_id)
+    if not target:
+        return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
+
+    target.name = nombre
+    target.username = cuenta
+    target.password_encrypted = encrypt_password(password)
+    target.initials = "".join(part[0] for part in nombre.split()[:2]).upper() or "US"
+    session.add(target)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        return templates.TemplateResponse(
+            "admin_usuarios.html",
+            _usuarios_context(request, admin_user, session, tipo, error="Esa cuenta ya está en uso."),
+            status_code=400,
+        )
+
+    return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
