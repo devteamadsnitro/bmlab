@@ -215,6 +215,7 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .e-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .e-icon.bm, .e-icon.page { background: rgba(24,119,242,0.1); }
 .e-icon.bm i, .e-icon.page i { color: #1877F2; font-size: 15px; }
+.e-icon.page i { font-size: 13px; }
 .e-icon.profile { background: var(--bg-accent); }
 .e-icon.profile i { color: var(--text-accent); font-size: 15px; }
 .e-info { flex: 1; min-width: 0; }
