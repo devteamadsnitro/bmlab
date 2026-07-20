@@ -27,6 +27,7 @@
 <div class="usuarios-list">
   {% set icon_class = "u-admin" if tipo == "administradores" else "u-cliente" %}
   {% for u in usuarios %}
+  {% set is_expanded = expand is not none and u.id == expand %}
   <div class="user-row" data-search="{{ (u.name ~ ' ' ~ u.username)|lower }}">
     <div class="u-icon {{ icon_class }}"><i class="ti ti-user"></i></div>
     <div class="u-info">
@@ -50,13 +51,13 @@
         <button class="btn-add-structure" type="button" title="Agregar estructura" onclick="openNewEstructura(this)" data-user-id="{{ u.id }}">
           <i class="ti ti-plus"></i> Estructura
         </button>
-        <button class="btn-caret" type="button" title="Mostrar estructuras" onclick="toggleEstructuras(this, {{ u.id }})">
+        <button class="btn-caret {{ 'open' if is_expanded else '' }}" type="button" title="Mostrar estructuras" onclick="toggleEstructuras(this, {{ u.id }})">
           <i class="ti ti-caret-down"></i>
         </button>
       </div>
     </div>
   </div>
-  <div class="u-estructuras" id="estructuras-{{ u.id }}" style="display:none;">
+  <div class="u-estructuras" id="estructuras-{{ u.id }}" {% if not is_expanded %}style="display:none;"{% endif %}>
     {% for a in u.assets %}
     <div class="estructura-row">
       <div class="e-icon {{ a.type }}"><i class="ti {{ asset_icon(a.type) }}"></i></div>

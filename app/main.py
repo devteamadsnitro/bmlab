@@ -175,6 +175,7 @@ def _usuarios_context(request: Request, user: User, session: Session, tipo: str,
         }
         for u in rows
     ]
+    extra.setdefault("expand", None)
     return {
         "request": request,
         "user": user,
@@ -186,12 +187,17 @@ def _usuarios_context(request: Request, user: User, session: Session, tipo: str,
 
 
 @app.get("/admin/usuarios")
-def admin_usuarios(request: Request, tipo: str = "clientes", session: Session = Depends(get_session)):
+def admin_usuarios(
+    request: Request,
+    tipo: str = "clientes",
+    expand: int | None = None,
+    session: Session = Depends(get_session),
+):
     user = get_current_user(request, session)
     if not user or not user.is_admin:
         return RedirectResponse("/login")
     return templates.TemplateResponse(
-        "admin_usuarios.html", _usuarios_context(request, user, session, tipo)
+        "admin_usuarios.html", _usuarios_context(request, user, session, tipo, expand=expand)
     )
 
 
@@ -261,7 +267,7 @@ def admin_usuarios_add_estructura(
     session.add(asset)
     session.commit()
 
-    return RedirectResponse(f"/admin/usuarios?tipo={tipo}", status_code=303)
+    return RedirectResponse(f"/admin/usuarios?tipo={tipo}&expand={user_id}", status_code=303)
 
 
 @app.post("/admin/usuarios/{user_id}/edit")
