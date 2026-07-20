@@ -27,6 +27,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 TYPE_LABELS = {"bm": "Business Manager", "page": "Fan Page", "profile": "Perfil personal"}
 templates.env.globals["type_label"] = lambda t: TYPE_LABELS.get(t, t)
+templates.env.globals["asset_version"] = str(int(datetime.now(timezone.utc).timestamp()))
 
 
 @app.on_event("startup")
