@@ -164,39 +164,37 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .b-done     { background: var(--bg-success); color: var(--text-success); }
 
 /* USUARIOS */
-.usuarios-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 1.5rem 1rem; gap: 1rem; flex-wrap: wrap; }
-.sub-tab-group { display: flex; gap: 6px; }
-.sub-tab { font-size: 13px; color: var(--text-secondary); text-decoration: none; padding: 7px 14px; border-radius: 20px; border: 0.5px solid var(--border-strong); }
-.sub-tab:hover { background: var(--surface-1); }
-.sub-tab.active { background: #1877F2; border-color: #1877F2; color: white; font-weight: 500; }
+.subtabs-row { display: flex; align-items: center; justify-content: space-between; padding-right: 1.5rem; }
+.subtabs-row .admin-tabs { flex: 1; }
 
-.btn-add-user { background: #1877F2; border: none; border-radius: var(--radius); padding: 9px 16px; font-size: 13px; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.btn-add-user { background: #1877F2; border: none; border-radius: var(--radius); padding: 9px 16px; font-size: 13px; color: white; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .btn-add-user:hover { background: #1565D8; }
 
-.usuarios-list { padding: 0 1.5rem 2rem; display: flex; flex-direction: column; gap: 8px; }
+.usuarios-list { padding: 1.25rem 1.5rem 2rem; }
 .usuarios-empty { color: var(--text-secondary); font-size: 13px; }
 
-.user-row { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 0.9rem 1.1rem; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; transition: border-color 0.12s; }
-.user-row:hover { border-color: var(--border-strong); }
+.user-row { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+.u-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.u-icon.u-cliente { background: rgba(24,119,242,0.1); }
+.u-icon.u-cliente i { color: #1877F2; font-size: 18px; }
+.u-icon.u-admin { background: var(--bg-danger); }
+.u-icon.u-admin i { color: var(--text-danger); font-size: 18px; }
 
-.user-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--bg-accent); color: var(--text-accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+.u-info { flex: 1; min-width: 0; }
+.u-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.u-field { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.u-field .mono { font-family: var(--font-mono); color: var(--text-primary); }
 
-.user-info { min-width: 130px; }
-.user-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
-.user-id { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.u-meta { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.u-id { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
 
-.user-creds { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 240px; }
-.cred-chip { display: flex; align-items: center; gap: 8px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 20px; padding: 6px 6px 6px 12px; font-size: 12px; color: var(--text-secondary); }
-.cred-chip i:first-child { font-size: 14px; color: var(--text-muted); }
-.cred-chip .mono { font-family: var(--font-mono); color: var(--text-primary); }
+.btn-copy { background: transparent; border: none; border-radius: 6px; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
+.btn-copy:hover { background: var(--surface-1); color: var(--text-accent); }
+.btn-copy i { font-size: 12px; }
 
-.btn-copy { background: transparent; border: none; border-radius: 6px; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
-.btn-copy:hover { background: var(--surface-2); color: var(--text-accent); }
-.btn-copy i { font-size: 13px; }
-
-.btn-edit { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 8px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; margin-left: auto; }
+.btn-edit { background: transparent; border: 0.5px solid var(--border-strong); border-radius: 8px; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); flex-shrink: 0; }
 .btn-edit:hover { background: var(--surface-1); color: var(--text-accent); border-color: var(--text-accent); }
-.btn-edit i { font-size: 15px; }
+.btn-edit i { font-size: 14px; }
 
 .user-dialog { border: 0.5px solid var(--border); border-radius: 16px; padding: 1.75rem; width: 100%; max-width: 340px; background: var(--surface-2); color: var(--text-primary); }
 .user-dialog::backdrop { background: rgba(0,0,0,0.4); }

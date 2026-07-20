@@ -3,10 +3,10 @@
 {% block content %}
 {% include "_admin_tabs.html" %}
 
-<div class="usuarios-toolbar">
-  <div class="sub-tab-group">
-    <a class="sub-tab {% if tipo == 'clientes' %}active{% endif %}" href="/admin/usuarios?tipo=clientes">Clientes</a>
-    <a class="sub-tab {% if tipo == 'administradores' %}active{% endif %}" href="/admin/usuarios?tipo=administradores">Administradores</a>
+<div class="subtabs-row">
+  <div class="admin-tabs">
+    <a class="tab {% if tipo == 'clientes' %}active{% endif %}" href="/admin/usuarios?tipo=clientes">Clientes</a>
+    <a class="tab {% if tipo == 'administradores' %}active{% endif %}" href="/admin/usuarios?tipo=administradores">Administradores</a>
   </div>
   <button class="btn-add-user" onclick="document.getElementById('new-user-dialog').showModal()">
     <i class="ti ti-user-plus"></i> Nuevo usuario
@@ -18,29 +18,28 @@
 {% endif %}
 
 <div class="usuarios-list">
+  {% set icon_class = "u-admin" if tipo == "administradores" else "u-cliente" %}
   {% for u in usuarios %}
   <div class="user-row">
-    <div class="user-avatar">{{ u.name[:2].upper() }}</div>
-    <div class="user-info">
-      <div class="user-name">{{ u.name }}</div>
-      <div class="user-id">ID #{{ u.id }}</div>
-    </div>
-    <div class="user-creds">
-      <div class="cred-chip">
-        <i class="ti ti-mail"></i>
-        <span class="mono">{{ u.username }}</span>
+    <div class="u-icon {{ icon_class }}"><i class="ti ti-user"></i></div>
+    <div class="u-info">
+      <div class="u-name">{{ u.name }}</div>
+      <div class="u-field">
+        <span>Cuenta: <span class="mono">{{ u.username }}</span></span>
         <button class="btn-copy" type="button" title="Copiar cuenta" onclick="copyText('{{ u.username }}', this)"><i class="ti ti-copy"></i></button>
       </div>
-      <div class="cred-chip">
-        <i class="ti ti-lock"></i>
-        <span class="mono">{{ u.password }}</span>
+      <div class="u-field">
+        <span>Contraseña: <span class="mono">{{ u.password }}</span></span>
         <button class="btn-copy" type="button" title="Copiar contraseña" onclick="copyText('{{ u.password }}', this)"><i class="ti ti-copy"></i></button>
       </div>
     </div>
-    <button class="btn-edit" type="button" title="Editar usuario" onclick="openEdit(this)"
-      data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
-      <i class="ti ti-pencil"></i>
-    </button>
+    <div class="u-meta">
+      <div class="u-id">#{{ u.id }}</div>
+      <button class="btn-edit" type="button" title="Editar usuario" onclick="openEdit(this)"
+        data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
+        <i class="ti ti-pencil"></i>
+      </button>
+    </div>
   </div>
   {% else %}
   <p class="usuarios-empty">No hay usuarios en esta categoría todavía.</p>
