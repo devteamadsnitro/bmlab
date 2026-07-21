@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timezone
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, Form, Request
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -154,10 +154,38 @@ def admin(request: Request, session: Session = Depends(get_session)):
         "bm": sum(1 for t in tickets if t.asset_type == "bm" and t.status != "done"),
         "today": sum(1 for t in tickets if t.created_at.date() == today),
     }
+    columns = {
+        "open": [t for t in tickets if t.status == "open"],
+        "progress": [t for t in tickets if t.status == "progress"],
+        "done": [t for t in tickets if t.status == "done"],
+    }
     return templates.TemplateResponse(
         "admin.html",
-        {"request": request, "user": user, "tickets": tickets, "stats": stats, "active_tab": "tickets"},
+        {"request": request, "user": user, "columns": columns, "stats": stats, "active_tab": "tickets"},
     )
+
+
+@app.post("/admin/tickets/{ticket_id}/status")
+def admin_update_ticket_status(
+    ticket_id: int,
+    request: Request,
+    status: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    user = get_current_user(request, session)
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=403)
+    if status not in ("open", "progress", "done"):
+        raise HTTPException(status_code=400)
+
+    ticket = session.get(Ticket, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404)
+
+    ticket.status = status
+    session.add(ticket)
+    session.commit()
+    return {"ok": True}
 
 
 def _usuarios_context(request: Request, user: User, session: Session, tipo: str, **extra):

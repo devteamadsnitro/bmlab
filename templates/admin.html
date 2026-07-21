@@ -7,24 +7,71 @@
   <div class="stat-card"><div class="stat-label">BM afectados</div><div class="stat-val">{{ stats.bm }}</div></div>
   <div class="stat-card"><div class="stat-label">Hoy</div><div class="stat-val">{{ stats.today }}</div></div>
 </div>
-<div class="tickets-wrap">
-  <div class="list-title">Últimas incidencias</div>
-  {% set badge_map = {"open": ("b-open", "Abierto"), "progress": ("b-progress", "En proceso"), "done": ("b-done", "Resuelto")} %}
+<div class="kanban-board">
   {% set icon_map = {"bm": "ti-building-store", "page": "ti-brand-facebook", "profile": "ti-user-circle"} %}
-  {% for t in tickets %}
-  {% set badge_class, badge_label = badge_map[t.status] %}
-  <div class="ticket-row">
-    <div class="t-icon t-{{ t.asset_type }}"><i class="ti {{ icon_map[t.asset_type] }}"></i></div>
-    <div class="t-info">
-      <div class="t-client">{{ t.client_name }}</div>
-      <div class="t-asset">{{ t.asset_label }} · {{ t.asset_external_id }}</div>
-      <span class="badge {{ badge_class }}" style="margin-top:5px;display:inline-block;">{{ badge_label }}</span>
+  {% set column_labels = {"open": "Abierto", "progress": "En proceso", "done": "Resuelto"} %}
+  {% for status in ["open", "progress", "done"] %}
+  <div class="kanban-column" data-status="{{ status }}">
+    <div class="kanban-header">
+      <span>{{ column_labels[status] }}</span>
+      <span class="kanban-count">{{ columns[status]|length }}</span>
     </div>
-    <div class="t-meta">
-      <div class="t-id">{{ t.code }}</div>
-      <div class="t-time">{{ t.created_at.strftime("%d/%m %H:%M") }}</div>
+    <div class="kanban-cards" data-status="{{ status }}">
+      {% for t in columns[status] %}
+      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" ondragstart="onDragStart(event, this)">
+        <div class="kc-top">
+          <div class="t-icon t-{{ t.asset_type }}"><i class="ti {{ icon_map[t.asset_type] }}"></i></div>
+          <div class="kc-id">{{ t.code }}</div>
+        </div>
+        <div class="kc-client">{{ t.client_name }}</div>
+        <div class="kc-asset">{{ t.asset_label }} · {{ t.asset_external_id }}</div>
+        <div class="kc-time">{{ t.created_at.strftime("%d/%m %H:%M") }}</div>
+      </div>
+      {% endfor %}
     </div>
   </div>
   {% endfor %}
 </div>
+
+<script>
+let draggedCard = null;
+
+function onDragStart(e, card) {
+  draggedCard = card;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function updateCounts() {
+  document.querySelectorAll('.kanban-column').forEach(col => {
+    col.querySelector('.kanban-count').textContent = col.querySelectorAll('.kanban-card').length;
+  });
+}
+
+document.querySelectorAll('.kanban-cards').forEach(zone => {
+  zone.addEventListener('dragover', e => {
+    e.preventDefault();
+    zone.classList.add('drag-over');
+  });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    if (!draggedCard) return;
+    const oldZone = draggedCard.parentElement;
+    const newStatus = zone.dataset.status;
+    if (oldZone === zone) return;
+
+    zone.appendChild(draggedCard);
+    updateCounts();
+
+    fetch('/admin/tickets/' + draggedCard.dataset.id + '/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'status=' + encodeURIComponent(newStatus),
+    }).then(r => {
+      if (!r.ok) { oldZone.appendChild(draggedCard); updateCounts(); }
+    }).catch(() => { oldZone.appendChild(draggedCard); updateCounts(); });
+  });
+});
+</script>
 {% endblock %}
