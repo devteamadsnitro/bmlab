@@ -126,6 +126,8 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .success-icon i { font-size: 30px; color: var(--text-success); }
 .success-title { font-size: 19px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px; }
 .success-body { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem; }
+.success-asset-list { text-align: left; list-style: none; margin: 10px 0; padding: 0; }
+.success-asset-list li { background: var(--surface-1); border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; color: var(--text-primary); font-size: 13px; }
 .ticket-badge { display: inline-block; background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 7px 14px; font-size: 13px; font-weight: 500; color: var(--text-primary); margin-bottom: 1.75rem; font-family: var(--font-mono); letter-spacing: 0.04em; }
 .btn-back { display: inline-block; text-decoration: none; background: transparent; border: 0.5px solid var(--border-strong); border-radius: var(--radius); padding: 10px 20px; font-size: 14px; color: var(--text-primary); cursor: pointer; }
 .btn-back:hover { background: var(--surface-1); }
@@ -173,6 +175,10 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .kc-id { font-size: 11px; font-family: var(--font-mono); color: var(--text-muted); }
 .kc-client { font-size: 13px; font-weight: 500; color: var(--text-primary); }
 .kc-asset { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.kc-more { background: none; border: none; padding: 0; margin-left: 4px; color: var(--text-accent); font-size: 11px; cursor: pointer; text-decoration: underline; }
+
+.activos-popup-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.25rem; max-height: 240px; overflow-y: auto; }
+.activos-popup-item { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 13px; color: var(--text-primary); }
 .kc-time { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 
 .kc-actions { display: flex; justify-content: flex-end; margin-top: 10px; }

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -16,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 
 from .database import DATABASE_URL, get_session, init_db
 from .mailer import send_ticket_resolved_email
-from .models import Asset, Ticket, User
+from .models import Asset, Ticket, TicketItem, User
 from .security import decrypt_password, encrypt_password, verify_advance_token, verify_password
 from .seed import seed
 from .telegram import send_ticket_notification
@@ -31,6 +32,7 @@ TYPE_ICONS = {"bm": "ti-building-store", "page": "ti-brand-facebook", "profile":
 templates.env.globals["type_label"] = lambda t: TYPE_LABELS.get(t, t)
 templates.env.globals["asset_icon"] = lambda t: TYPE_ICONS.get(t, "ti-building-store")
 templates.env.globals["asset_version"] = str(int(datetime.now(timezone.utc).timestamp()))
+templates.env.filters["tojson"] = json.dumps
 
 
 @app.on_event("startup")
@@ -111,25 +113,26 @@ def report(request: Request, session: Session = Depends(get_session)):
 @app.post("/tickets")
 async def create_ticket(
     request: Request,
-    asset_id: str = Form(...),
+    asset_ids: list[str] = Form(...),
     session: Session = Depends(get_session),
 ):
     user = get_current_user(request, session)
     if not user or user.is_admin:
         return RedirectResponse("/login", status_code=303)
 
-    asset = session.exec(
-        select(Asset).where(Asset.owner_id == user.id, Asset.external_id == asset_id)
-    ).first()
-    if not asset:
+    assets = session.exec(
+        select(Asset).where(Asset.owner_id == user.id, Asset.external_id.in_(asset_ids))
+    ).all()
+    if not assets:
         return RedirectResponse("/report", status_code=303)
 
+    first = assets[0]
     ticket = Ticket(
         code=next_ticket_code(session),
         client_name=user.name,
-        asset_external_id=asset.external_id,
-        asset_label=asset.label,
-        asset_type=asset.type,
+        asset_external_id=first.external_id,
+        asset_label=first.label,
+        asset_type=first.type,
         status="open",
         user_id=user.id,
     )
@@ -137,9 +140,22 @@ async def create_ticket(
     session.commit()
     session.refresh(ticket)
 
-    await send_ticket_notification(ticket, user.username, decrypt_password(user.password_encrypted))
+    for asset in assets:
+        session.add(
+            TicketItem(
+                ticket_id=ticket.id,
+                asset_external_id=asset.external_id,
+                asset_label=asset.label,
+                asset_type=asset.type,
+            )
+        )
+    session.commit()
 
-    return templates.TemplateResponse("success.html", {"request": request, "user": user, "ticket": ticket})
+    await send_ticket_notification(ticket, assets, user.username, decrypt_password(user.password_encrypted))
+
+    return templates.TemplateResponse(
+        "success.html", {"request": request, "user": user, "ticket": ticket, "assets": assets}
+    )
 
 
 @app.get("/admin")
@@ -160,13 +176,22 @@ def admin(request: Request, session: Session = Depends(get_session)):
 
     def ticket_view(t: Ticket) -> dict:
         owner = owners.get(t.user_id)
+        rows = session.exec(select(TicketItem).where(TicketItem.ticket_id == t.id)).all()
+        items = (
+            [{"asset_label": i.asset_label, "asset_external_id": i.asset_external_id, "asset_type": i.asset_type} for i in rows]
+            if rows
+            else [{"asset_label": t.asset_label, "asset_external_id": t.asset_external_id, "asset_type": t.asset_type}]
+        )
+        types = sorted({item["asset_type"] for item in items})
         return {
             "id": t.id,
             "code": t.code,
             "client_name": t.client_name,
-            "asset_label": t.asset_label,
-            "asset_external_id": t.asset_external_id,
-            "asset_type": t.asset_type,
+            "asset_label": items[0]["asset_label"],
+            "asset_external_id": items[0]["asset_external_id"],
+            "asset_type": items[0]["asset_type"],
+            "items": items,
+            "types": ",".join(types),
             "status": t.status,
             "created_at": t.created_at,
             "email": owner.email if owner else None,

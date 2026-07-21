@@ -3,7 +3,15 @@
 <div class="success-wrap">
   <div class="success-icon"><i class="ti ti-circle-check"></i></div>
   <div class="success-title">Notificación enviada</div>
-  <div class="success-body"><strong>{{ ticket.asset_label }}</strong> ha sido reportado como restringido. El equipo gestionará la incidencia lo antes posible.</div>
+  <div class="success-body">
+    Los siguientes activos han sido reportados como restringidos:
+    <ul class="success-asset-list">
+      {% for a in assets %}
+      <li><strong>{{ a.label }}</strong></li>
+      {% endfor %}
+    </ul>
+    El equipo gestionará la incidencia lo antes posible.
+  </div>
   <div class="ticket-badge">{{ ticket.code }}</div><br>
   <a class="btn-back" href="/report"><i class="ti ti-arrow-left" style="vertical-align:-2px;margin-right:4px;"></i>Volver</a>
 </div>

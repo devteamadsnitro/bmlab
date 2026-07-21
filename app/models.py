@@ -38,3 +38,15 @@ class Ticket(SQLModel, table=True):
     status: str = "open"
     created_at: datetime = Field(default_factory=datetime.utcnow)
     user_id: int = Field(foreign_key="user.id")
+
+
+class TicketItem(SQLModel, table=True):
+    """One row per activo reported on a ticket. Ticket keeps its own
+    asset_* fields populated with the first selected activo so older
+    tickets created before multi-select support remain fully readable."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    ticket_id: int = Field(foreign_key="ticket.id")
+    asset_external_id: str
+    asset_label: str
+    asset_type: str

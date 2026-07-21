@@ -3,13 +3,13 @@
 {% block content %}
 <div class="page">
   <div class="page-title">¿Qué activo está restringido?</div>
-  <div class="page-sub">Selecciona el activo afectado y pulsa <strong>Notificar</strong>. El equipo recibirá el aviso de inmediato.</div>
-  <div class="structure-label">{{ user.structure }}</div>
+  <div class="page-sub">Selecciona los activos afectados y pulsa <strong>Notificar</strong>. El equipo recibirá el aviso de inmediato.</div>
+  <div class="structure-label">Activos</div>
   <form method="post" action="/tickets">
     <div class="asset-list">
       {% for asset in assets %}
       <label class="asset-item" for="asset-{{ asset.external_id }}">
-        <input type="radio" name="asset_id" id="asset-{{ asset.external_id }}" value="{{ asset.external_id }}" required onchange="onSelect(this)" />
+        <input type="checkbox" name="asset_ids" id="asset-{{ asset.external_id }}" value="{{ asset.external_id }}" onchange="onSelect(this)" />
         <div class="asset-icon {{ asset.type }}"><i class="ti {{ asset.icon }}"></i></div>
         <div class="asset-text">
           <div class="asset-name">{{ asset.label }}</div>
@@ -20,16 +20,23 @@
       {% endfor %}
     </div>
     <div class="selection-info" id="sel-info"></div>
-    <button class="btn-notify" type="submit"><i class="ti ti-send"></i> Notificar incidencia</button>
+    <button class="btn-notify" type="submit" id="btn-notify" disabled><i class="ti ti-send"></i> Notificar incidencia</button>
   </form>
 </div>
 <script>
 function onSelect(input) {
-  document.querySelectorAll('.asset-item').forEach(el => el.classList.remove('selected'));
-  const item = input.closest('.asset-item');
-  item.classList.add('selected');
-  const name = item.querySelector('.asset-name').textContent;
-  document.getElementById('sel-info').innerHTML = `Vas a notificar: <span>${name}</span>`;
+  input.closest('.asset-item').classList.toggle('selected', input.checked);
+  const names = Array.from(document.querySelectorAll('.asset-item input:checked'))
+    .map(i => i.closest('.asset-item').querySelector('.asset-name').textContent);
+  const info = document.getElementById('sel-info');
+  const btn = document.getElementById('btn-notify');
+  if (names.length === 0) {
+    info.innerHTML = '';
+    btn.disabled = true;
+  } else {
+    info.innerHTML = 'Vas a notificar: <span>' + names.join(', ') + '</span>';
+    btn.disabled = false;
+  }
 }
 </script>
 {% endblock %}

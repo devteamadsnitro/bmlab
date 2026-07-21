@@ -36,13 +36,18 @@
     </div>
     <div class="kanban-cards" data-status="{{ status }}">
       {% for t in columns[status] %}
-      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" data-client="{{ t.client_name }}" data-email="{{ t.email or '' }}" data-type="{{ t.asset_type }}" data-date="{{ t.created_at.strftime('%Y-%m-%d') }}" ondragstart="onDragStart(event, this)">
+      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" data-client="{{ t.client_name }}" data-email="{{ t.email or '' }}" data-type="{{ t.types }}" data-date="{{ t.created_at.strftime('%Y-%m-%d') }}" ondragstart="onDragStart(event, this)">
         <div class="kc-top">
           <div class="t-icon t-{{ t.asset_type }}"><i class="ti {{ icon_map[t.asset_type] }}"></i></div>
           <div class="kc-id">{{ t.code }}</div>
         </div>
         <div class="kc-client">{{ t.client_name }}</div>
-        <div class="kc-asset">{{ t.asset_label }} · {{ t.asset_external_id }}</div>
+        <div class="kc-asset">
+          {{ t.asset_label }} · {{ t.asset_external_id }}
+          {% if t['items']|length > 1 %}
+          <button type="button" class="kc-more" onclick="showActivos(this)" data-items='{{ t["items"]|tojson }}'>mostrar más...</button>
+          {% endif %}
+        </div>
         <div class="kc-time">{{ t.created_at.strftime("%d/%m %H:%M") }}</div>
         {% if status == "done" %}
         <div class="kc-actions">
@@ -75,6 +80,14 @@
   </div>
 </dialog>
 
+<dialog id="activos-dialog" class="user-dialog">
+  <div class="dialog-title">Activos reportados</div>
+  <div id="activos-list" class="activos-popup-list"></div>
+  <div class="dialog-actions">
+    <button type="button" class="btn-back" onclick="document.getElementById('activos-dialog').close()" style="flex:1;">Cerrar</button>
+  </div>
+</dialog>
+
 <script>
 let draggedCard = null;
 
@@ -97,7 +110,7 @@ function applyFilters() {
 
   document.querySelectorAll('.kanban-card').forEach(card => {
     const matchesClient = !q || card.dataset.client.toLowerCase().includes(q);
-    const matchesType = !type || card.dataset.type === type;
+    const matchesType = !type || card.dataset.type.split(',').includes(type);
     const cardDate = card.dataset.date;
     const matchesFrom = !from || cardDate >= from;
     const matchesTo = !to || cardDate <= to;
@@ -114,6 +127,13 @@ function updateStatus(card, newStatus, oldZone) {
   }).then(r => {
     if (!r.ok) { oldZone.appendChild(card); updateCounts(); }
   }).catch(() => { oldZone.appendChild(card); updateCounts(); });
+}
+
+function showActivos(btn) {
+  const items = JSON.parse(btn.dataset.items);
+  const list = document.getElementById('activos-list');
+  list.innerHTML = items.map(i => '<div class="activos-popup-item">' + i.asset_label + ' · ' + i.asset_external_id + '</div>').join('');
+  document.getElementById('activos-dialog').showModal();
 }
 
 function maybeNotify(card) {

@@ -16,18 +16,19 @@ BASE_URL = (
 )
 
 
-async def send_ticket_notification(ticket, cuenta: str, password: str) -> None:
+async def send_ticket_notification(ticket, items, cuenta: str, password: str) -> None:
     if not BOT_TOKEN or not CHAT_ID:
         logger.warning("Telegram not configured; skipping notification for %s", ticket.code)
         return
 
     advance_link = f"{BASE_URL}/t/advance/{make_advance_token(ticket.id)}"
+    activos_text = "\n".join(f"• {item.label} ({item.external_id})" for item in items)
     text = (
         f"🚨 Nueva incidencia {ticket.code}\n"
         f"Cliente: {ticket.client_name}\n"
         f"Cuenta: {cuenta}\n"
         f"Pass: {password}\n"
-        f"Activo: {ticket.asset_label} ({ticket.asset_external_id})\n\n"
+        f"Activos:\n{activos_text}\n\n"
         f"👉 Marcar en proceso: {advance_link}"
     )
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
