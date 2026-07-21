@@ -15,6 +15,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 from .database import DATABASE_URL, get_session, init_db
+from .mailer import send_ticket_resolved_email
 from .models import Asset, Ticket, User
 from .security import decrypt_password, encrypt_password, verify_password
 from .seed import seed
@@ -154,10 +155,28 @@ def admin(request: Request, session: Session = Depends(get_session)):
         "bm": sum(1 for t in tickets if t.asset_type == "bm" and t.status != "done"),
         "today": sum(1 for t in tickets if t.created_at.date() == today),
     }
+
+    owners = {u.id: u for u in session.exec(select(User)).all()}
+
+    def ticket_view(t: Ticket) -> dict:
+        owner = owners.get(t.user_id)
+        return {
+            "id": t.id,
+            "code": t.code,
+            "client_name": t.client_name,
+            "asset_label": t.asset_label,
+            "asset_external_id": t.asset_external_id,
+            "asset_type": t.asset_type,
+            "status": t.status,
+            "created_at": t.created_at,
+            "email": owner.email if owner else None,
+        }
+
+    views = [ticket_view(t) for t in tickets]
     columns = {
-        "open": [t for t in tickets if t.status == "open"],
-        "progress": [t for t in tickets if t.status == "progress"],
-        "done": [t for t in tickets if t.status == "done"],
+        "open": [v for v in views if v["status"] == "open"],
+        "progress": [v for v in views if v["status"] == "progress"],
+        "done": [v for v in views if v["status"] == "done"],
     }
     return templates.TemplateResponse(
         "admin.html",
@@ -188,6 +207,28 @@ def admin_update_ticket_status(
     return {"ok": True}
 
 
+@app.post("/admin/tickets/{ticket_id}/notify")
+async def admin_notify_ticket_resolved(
+    ticket_id: int,
+    request: Request,
+    session: Session = Depends(get_session),
+):
+    user = get_current_user(request, session)
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=403)
+
+    ticket = session.get(Ticket, ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404)
+
+    owner = session.get(User, ticket.user_id)
+    if not owner or not owner.email:
+        raise HTTPException(status_code=400, detail="El cliente no tiene un email registrado.")
+
+    await send_ticket_resolved_email(owner.email, owner.name, ticket.code)
+    return {"ok": True}
+
+
 def _usuarios_context(request: Request, user: User, session: Session, tipo: str, **extra):
     if tipo not in ("clientes", "administradores"):
         tipo = "clientes"
@@ -199,6 +240,7 @@ def _usuarios_context(request: Request, user: User, session: Session, tipo: str,
             "name": u.name,
             "username": u.username,
             "password": decrypt_password(u.password_encrypted),
+            "email": u.email or "",
             "assets": session.exec(select(Asset).where(Asset.owner_id == u.id)).all(),
         }
         for u in rows
@@ -236,6 +278,7 @@ def admin_usuarios_create(
     nombre: str = Form(...),
     cuenta: str = Form(...),
     password: str = Form(...),
+    email: str = Form(""),
     session: Session = Depends(get_session),
 ):
     user = get_current_user(request, session)
@@ -249,6 +292,7 @@ def admin_usuarios_create(
         name=nombre,
         initials=initials,
         is_admin=(tipo == "administradores"),
+        email=email.strip() or None,
     )
     session.add(nuevo)
     try:
@@ -259,7 +303,7 @@ def admin_usuarios_create(
             "admin_usuarios.html",
             _usuarios_context(
                 request, user, session, tipo,
-                error="Esa cuenta ya está en uso.", form_nombre=nombre, form_cuenta=cuenta,
+                error="Esa cuenta ya está en uso.", form_nombre=nombre, form_cuenta=cuenta, form_email=email,
             ),
             status_code=400,
         )
@@ -306,6 +350,7 @@ def admin_usuarios_edit(
     nombre: str = Form(...),
     cuenta: str = Form(...),
     password: str = Form(...),
+    email: str = Form(""),
     session: Session = Depends(get_session),
 ):
     admin_user = get_current_user(request, session)
@@ -319,6 +364,7 @@ def admin_usuarios_edit(
     target.name = nombre
     target.username = cuenta
     target.password_encrypted = encrypt_password(password)
+    target.email = email.strip() or None
     target.initials = "".join(part[0] for part in nombre.split()[:2]).upper() or "US"
     session.add(target)
     try:

@@ -45,7 +45,7 @@
       <div class="u-id">#{{ u.id }}</div>
       <div class="u-actions">
         <button class="btn-edit" type="button" title="Editar usuario" onclick="openEdit(this)"
-          data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}">
+          data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}" data-email="{{ u.email }}">
           <i class="ti ti-pencil"></i>
         </button>
         <button class="btn-add-structure" type="button" title="Agregar estructura" onclick="openNewEstructura(this)" data-user-id="{{ u.id }}">
@@ -83,6 +83,7 @@
     <div class="field"><label>Nombre</label><input type="text" name="nombre" value="{{ form_nombre or '' }}" required /></div>
     <div class="field"><label>Cuenta</label><input type="email" name="cuenta" value="{{ form_cuenta or '' }}" required /></div>
     <div class="field"><label>Contraseña</label><input type="text" name="password" required /></div>
+    <div class="field"><label>Email</label><input type="email" name="email" value="{{ form_email or '' }}" placeholder="opcional" /></div>
     <div class="dialog-actions">
       <button type="button" class="btn-back" onclick="document.getElementById('new-user-dialog').close()">Cancelar</button>
       <button type="submit" class="btn-login" style="margin-top:0;">Crear</button>
@@ -97,6 +98,7 @@
     <div class="field"><label>Nombre</label><input type="text" name="nombre" id="edit-nombre" required /></div>
     <div class="field"><label>Cuenta</label><input type="email" name="cuenta" id="edit-cuenta" required /></div>
     <div class="field"><label>Contraseña</label><input type="text" name="password" id="edit-password" required /></div>
+    <div class="field"><label>Email</label><input type="email" name="email" id="edit-email" placeholder="opcional" /></div>
     <div class="dialog-actions">
       <button type="button" class="btn-back" onclick="document.getElementById('edit-user-dialog').close()">Cancelar</button>
       <button type="submit" class="btn-login" style="margin-top:0;">Guardar</button>
@@ -149,6 +151,7 @@ function openEdit(btn) {
   document.getElementById('edit-nombre').value = d.name;
   document.getElementById('edit-cuenta').value = d.username;
   document.getElementById('edit-password').value = d.password;
+  document.getElementById('edit-email').value = d.email;
   document.getElementById('edit-user-form').action = '/admin/usuarios/' + d.id + '/edit';
   document.getElementById('edit-user-dialog').showModal();
 }

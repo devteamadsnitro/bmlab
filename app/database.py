@@ -1,5 +1,7 @@
 import os
 
+from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session, SQLModel, create_engine
 
 
@@ -16,6 +18,16 @@ engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 def init_db() -> None:
     SQLModel.metadata.create_all(engine)
+    _add_column_if_missing("user", "email", "VARCHAR")
+
+
+def _add_column_if_missing(table: str, column: str, sql_type: str) -> None:
+    with engine.connect() as conn:
+        try:
+            conn.execute(text(f'ALTER TABLE "{table}" ADD COLUMN {column} {sql_type}'))
+            conn.commit()
+        except DBAPIError:
+            conn.rollback()
 
 
 def get_session():

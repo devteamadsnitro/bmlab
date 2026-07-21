@@ -12,6 +12,7 @@ class User(SQLModel, table=True):
     initials: str
     structure: str = ""
     is_admin: bool = False
+    email: Optional[str] = None
 
     assets: list["Asset"] = Relationship(back_populates="owner")
 

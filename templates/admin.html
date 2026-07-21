@@ -18,7 +18,7 @@
     </div>
     <div class="kanban-cards" data-status="{{ status }}">
       {% for t in columns[status] %}
-      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" ondragstart="onDragStart(event, this)">
+      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" data-client="{{ t.client_name }}" data-email="{{ t.email or '' }}" ondragstart="onDragStart(event, this)">
         <div class="kc-top">
           <div class="t-icon t-{{ t.asset_type }}"><i class="ti {{ icon_map[t.asset_type] }}"></i></div>
           <div class="kc-id">{{ t.code }}</div>
@@ -32,6 +32,23 @@
   </div>
   {% endfor %}
 </div>
+
+<dialog id="notify-dialog" class="user-dialog">
+  <div class="dialog-title">Notificar al cliente</div>
+  <p id="notify-text" class="dialog-body-text"></p>
+  <div class="dialog-actions">
+    <button type="button" class="btn-back" id="notify-no">No</button>
+    <button type="button" class="btn-login" id="notify-yes" style="margin-top:0;">Sí, enviar</button>
+  </div>
+</dialog>
+
+<dialog id="no-email-dialog" class="user-dialog">
+  <div class="dialog-title">Sin email registrado</div>
+  <p class="dialog-body-text dialog-body-danger">Este cliente no tiene un correo electrónico registrado, no se puede enviar la notificación.</p>
+  <div class="dialog-actions">
+    <button type="button" class="btn-back" onclick="document.getElementById('no-email-dialog').close()" style="flex:1;">Cerrar</button>
+  </div>
+</dialog>
 
 <script>
 let draggedCard = null;
@@ -47,6 +64,35 @@ function updateCounts() {
   });
 }
 
+function updateStatus(card, newStatus, oldZone) {
+  fetch('/admin/tickets/' + card.dataset.id + '/status', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: 'status=' + encodeURIComponent(newStatus),
+  }).then(r => {
+    if (!r.ok) { oldZone.appendChild(card); updateCounts(); }
+  }).catch(() => { oldZone.appendChild(card); updateCounts(); });
+}
+
+function maybeNotify(card) {
+  const email = card.dataset.email;
+  const client = card.dataset.client;
+  if (!email) {
+    document.getElementById('no-email-dialog').showModal();
+    return;
+  }
+  document.getElementById('notify-text').textContent =
+    '¿Quieres enviar notificación al cliente ' + client + ' a ' + email + '?';
+  document.getElementById('notify-yes').onclick = () => {
+    fetch('/admin/tickets/' + card.dataset.id + '/notify', { method: 'POST' });
+    document.getElementById('notify-dialog').close();
+  };
+  document.getElementById('notify-no').onclick = () => {
+    document.getElementById('notify-dialog').close();
+  };
+  document.getElementById('notify-dialog').showModal();
+}
+
 document.querySelectorAll('.kanban-cards').forEach(zone => {
   zone.addEventListener('dragover', e => {
     e.preventDefault();
@@ -58,19 +104,18 @@ document.querySelectorAll('.kanban-cards').forEach(zone => {
     zone.classList.remove('drag-over');
     if (!draggedCard) return;
     const oldZone = draggedCard.parentElement;
+    const oldStatus = oldZone.dataset.status;
     const newStatus = zone.dataset.status;
     if (oldZone === zone) return;
 
-    zone.appendChild(draggedCard);
+    const card = draggedCard;
+    zone.appendChild(card);
     updateCounts();
+    updateStatus(card, newStatus, oldZone);
 
-    fetch('/admin/tickets/' + draggedCard.dataset.id + '/status', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'status=' + encodeURIComponent(newStatus),
-    }).then(r => {
-      if (!r.ok) { oldZone.appendChild(draggedCard); updateCounts(); }
-    }).catch(() => { oldZone.appendChild(draggedCard); updateCounts(); });
+    if (oldStatus === 'progress' && newStatus === 'done') {
+      maybeNotify(card);
+    }
   });
 });
 </script>
