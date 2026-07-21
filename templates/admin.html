@@ -26,6 +26,13 @@
         <div class="kc-client">{{ t.client_name }}</div>
         <div class="kc-asset">{{ t.asset_label }} · {{ t.asset_external_id }}</div>
         <div class="kc-time">{{ t.created_at.strftime("%d/%m %H:%M") }}</div>
+        {% if status == "done" %}
+        <div class="kc-actions">
+          <button type="button" class="btn-notify-ticket" onclick="maybeNotify(this.closest('.kanban-card'))">
+            <i class="ti ti-send"></i> Enviar notificación
+          </button>
+        </div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
