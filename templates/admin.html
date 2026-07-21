@@ -7,6 +7,24 @@
   <div class="stat-card"><div class="stat-label">BM afectados</div><div class="stat-val">{{ stats.bm }}</div></div>
   <div class="stat-card"><div class="stat-label">Hoy</div><div class="stat-val">{{ stats.today }}</div></div>
 </div>
+<div class="tickets-filter-row">
+  <div class="usuarios-search">
+    <i class="ti ti-search"></i>
+    <input type="text" id="ticket-search" placeholder="Buscar por cliente..." oninput="applyFilters()" />
+  </div>
+  <select id="ticket-type-filter" class="filter-select" onchange="applyFilters()">
+    <option value="">Todos los tipos</option>
+    <option value="bm">Business Manager</option>
+    <option value="profile">Perfil</option>
+    <option value="page">Fan Page</option>
+  </select>
+  <div class="date-range">
+    <input type="date" id="ticket-date-from" value="{{ default_date_from }}" onchange="applyFilters()" />
+    <span>–</span>
+    <input type="date" id="ticket-date-to" value="{{ default_date_to }}" onchange="applyFilters()" />
+  </div>
+</div>
+
 <div class="kanban-board">
   {% set icon_map = {"bm": "ti-building-store", "page": "ti-brand-facebook", "profile": "ti-user-circle"} %}
   {% set column_labels = {"open": "Abierto", "progress": "En proceso", "done": "Resuelto"} %}
@@ -18,7 +36,7 @@
     </div>
     <div class="kanban-cards" data-status="{{ status }}">
       {% for t in columns[status] %}
-      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" data-client="{{ t.client_name }}" data-email="{{ t.email or '' }}" ondragstart="onDragStart(event, this)">
+      <div class="kanban-card" draggable="true" data-id="{{ t.id }}" data-client="{{ t.client_name }}" data-email="{{ t.email or '' }}" data-type="{{ t.asset_type }}" data-date="{{ t.created_at.strftime('%Y-%m-%d') }}" ondragstart="onDragStart(event, this)">
         <div class="kc-top">
           <div class="t-icon t-{{ t.asset_type }}"><i class="ti {{ icon_map[t.asset_type] }}"></i></div>
           <div class="kc-id">{{ t.code }}</div>
@@ -67,8 +85,25 @@ function onDragStart(e, card) {
 
 function updateCounts() {
   document.querySelectorAll('.kanban-column').forEach(col => {
-    col.querySelector('.kanban-count').textContent = col.querySelectorAll('.kanban-card').length;
+    col.querySelector('.kanban-count').textContent = col.querySelectorAll('.kanban-card:not(.filtered-out)').length;
   });
+}
+
+function applyFilters() {
+  const q = document.getElementById('ticket-search').value.trim().toLowerCase();
+  const type = document.getElementById('ticket-type-filter').value;
+  const from = document.getElementById('ticket-date-from').value;
+  const to = document.getElementById('ticket-date-to').value;
+
+  document.querySelectorAll('.kanban-card').forEach(card => {
+    const matchesClient = !q || card.dataset.client.toLowerCase().includes(q);
+    const matchesType = !type || card.dataset.type === type;
+    const cardDate = card.dataset.date;
+    const matchesFrom = !from || cardDate >= from;
+    const matchesTo = !to || cardDate <= to;
+    card.classList.toggle('filtered-out', !(matchesClient && matchesType && matchesFrom && matchesTo));
+  });
+  updateCounts();
 }
 
 function updateStatus(card, newStatus, oldZone) {
@@ -125,5 +160,7 @@ document.querySelectorAll('.kanban-cards').forEach(zone => {
     }
   });
 });
+
+applyFilters();
 </script>
 {% endblock %}

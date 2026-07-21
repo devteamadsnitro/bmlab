@@ -1,6 +1,6 @@
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Form, HTTPException, Request
@@ -178,9 +178,21 @@ def admin(request: Request, session: Session = Depends(get_session)):
         "progress": [v for v in views if v["status"] == "progress"],
         "done": [v for v in views if v["status"] == "done"],
     }
+
+    monday_this_week = today - timedelta(days=today.weekday())
+    monday_last_week = monday_this_week - timedelta(days=7)
+
     return templates.TemplateResponse(
         "admin.html",
-        {"request": request, "user": user, "columns": columns, "stats": stats, "active_tab": "tickets"},
+        {
+            "request": request,
+            "user": user,
+            "columns": columns,
+            "stats": stats,
+            "active_tab": "tickets",
+            "default_date_from": monday_last_week.isoformat(),
+            "default_date_to": today.isoformat(),
+        },
     )
 
 

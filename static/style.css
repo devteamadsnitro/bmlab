@@ -150,6 +150,15 @@ body { font-family: var(--font-sans); background: var(--surface-0); color: var(-
 .t-profile i { color: var(--text-accent); font-size: 18px; }
 
 /* KANBAN */
+.tickets-filter-row { display: flex; align-items: center; gap: 10px; margin: 1.25rem 1.5rem 0; flex-wrap: wrap; }
+.tickets-filter-row .usuarios-search { flex: 1; min-width: 200px; margin: 0; }
+.filter-select { padding: 9px 12px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 13px; background: var(--surface-1); color: var(--text-primary); font-family: var(--font-sans); outline: none; }
+.date-range { display: flex; align-items: center; gap: 6px; }
+.date-range input[type="date"] { padding: 8px 10px; border: 0.5px solid var(--border-strong); border-radius: var(--radius); font-size: 13px; background: var(--surface-1); color: var(--text-primary); font-family: var(--font-sans); outline: none; }
+.date-range span { color: var(--text-muted); font-size: 13px; }
+
+.kanban-card.filtered-out { display: none; }
+
 .kanban-board { display: flex; gap: 12px; padding: 1.25rem 1.5rem 2rem; align-items: flex-start; overflow-x: auto; }
 .kanban-column { flex: 1; min-width: 260px; background: var(--surface-1); border-radius: 12px; padding: 10px; }
 .kanban-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 12px; font-size: 11px; font-weight: 500; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
