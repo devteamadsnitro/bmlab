@@ -406,6 +406,53 @@ def admin_usuarios_add_estructura(
     return RedirectResponse(f"/admin/usuarios?tipo={tipo}&expand={user_id}", status_code=303)
 
 
+@app.post("/admin/usuarios/{user_id}/estructuras/{asset_id}/edit")
+def admin_usuarios_edit_estructura(
+    user_id: int,
+    asset_id: int,
+    request: Request,
+    tipo: str = Form(...),
+    nombre: str = Form(...),
+    activo: str = Form(...),
+    codigo: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    admin_user = get_current_user(request, session)
+    if not admin_user or not admin_user.is_admin:
+        return RedirectResponse("/login", status_code=303)
+
+    asset = session.get(Asset, asset_id)
+    if asset and asset.owner_id == user_id:
+        asset.label = nombre
+        asset.type = activo
+        asset.external_id = codigo
+        asset.icon = TYPE_ICONS.get(activo, "ti-building-store")
+        session.add(asset)
+        session.commit()
+
+    return RedirectResponse(f"/admin/usuarios?tipo={tipo}&expand={user_id}", status_code=303)
+
+
+@app.post("/admin/usuarios/{user_id}/estructuras/{asset_id}/delete")
+def admin_usuarios_delete_estructura(
+    user_id: int,
+    asset_id: int,
+    request: Request,
+    tipo: str = Form(...),
+    session: Session = Depends(get_session),
+):
+    admin_user = get_current_user(request, session)
+    if not admin_user or not admin_user.is_admin:
+        return RedirectResponse("/login", status_code=303)
+
+    asset = session.get(Asset, asset_id)
+    if asset and asset.owner_id == user_id:
+        session.delete(asset)
+        session.commit()
+
+    return RedirectResponse(f"/admin/usuarios?tipo={tipo}&expand={user_id}", status_code=303)
+
+
 @app.post("/admin/usuarios/{user_id}/edit")
 def admin_usuarios_edit(
     user_id: int,

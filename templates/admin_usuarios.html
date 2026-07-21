@@ -48,8 +48,8 @@
           data-id="{{ u.id }}" data-name="{{ u.name }}" data-username="{{ u.username }}" data-password="{{ u.password }}" data-email="{{ u.email }}">
           <i class="ti ti-pencil"></i>
         </button>
-        <button class="btn-add-structure" type="button" title="Agregar estructura" onclick="openNewEstructura(this)" data-user-id="{{ u.id }}">
-          <i class="ti ti-plus"></i> Estructura
+        <button class="btn-add-structure" type="button" title="Agregar activo" onclick="openNewEstructura(this)" data-user-id="{{ u.id }}">
+          <i class="ti ti-plus"></i> Activo
         </button>
         <button class="btn-caret {{ 'open' if is_expanded else '' }}" type="button" title="Mostrar estructuras" onclick="toggleEstructuras(this, {{ u.id }})">
           <i class="ti ti-caret-down"></i>
@@ -65,9 +65,19 @@
         <div class="e-name">{{ a.label }}</div>
         <div class="e-type">{{ type_label(a.type) }} · {{ a.external_id }}</div>
       </div>
+      <div class="e-actions">
+        <button class="btn-edit" type="button" title="Editar activo" onclick="openEditEstructura(this)"
+          data-asset-id="{{ a.id }}" data-user-id="{{ u.id }}" data-nombre="{{ a.label }}" data-tipo="{{ a.type }}" data-codigo="{{ a.external_id }}">
+          <i class="ti ti-pencil"></i>
+        </button>
+        <button class="btn-delete" type="button" title="Eliminar activo" onclick="deleteEstructura(this)"
+          data-asset-id="{{ a.id }}" data-user-id="{{ u.id }}">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>
     </div>
     {% else %}
-    <p class="usuarios-empty">Sin estructuras todavía.</p>
+    <p class="usuarios-empty">Sin activos todavía.</p>
     {% endfor %}
   </div>
   {% else %}
@@ -109,7 +119,7 @@
 <dialog id="new-estructura-dialog" class="user-dialog">
   <form id="new-estructura-form" method="post" action="">
     <input type="hidden" name="tipo" value="{{ tipo }}" />
-    <div class="dialog-title">Nueva estructura</div>
+    <div class="dialog-title">Nuevo activo</div>
     <div class="field"><label>Nombre</label><input type="text" name="nombre" required /></div>
     <div class="field">
       <label>Activo</label>
@@ -122,6 +132,27 @@
     <div class="field"><label>Código</label><input type="text" name="codigo" required /></div>
     <div class="dialog-actions">
       <button type="button" class="btn-back" onclick="document.getElementById('new-estructura-dialog').close()">Cancelar</button>
+      <button type="submit" class="btn-login" style="margin-top:0;">Guardar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="edit-estructura-dialog" class="user-dialog">
+  <form id="edit-estructura-form" method="post" action="">
+    <input type="hidden" name="tipo" value="{{ tipo }}" />
+    <div class="dialog-title">Editar activo</div>
+    <div class="field"><label>Nombre</label><input type="text" name="nombre" id="edit-estructura-nombre" required /></div>
+    <div class="field">
+      <label>Activo</label>
+      <select name="activo" id="edit-estructura-tipo" required>
+        <option value="bm">Business Manager</option>
+        <option value="profile">Perfil</option>
+        <option value="page">Fan Page</option>
+      </select>
+    </div>
+    <div class="field"><label>Código</label><input type="text" name="codigo" id="edit-estructura-codigo" required /></div>
+    <div class="dialog-actions">
+      <button type="button" class="btn-back" onclick="document.getElementById('edit-estructura-dialog').close()">Cancelar</button>
       <button type="submit" class="btn-login" style="margin-top:0;">Guardar</button>
     </div>
   </form>
@@ -159,6 +190,27 @@ function openNewEstructura(btn) {
   document.getElementById('new-estructura-form').action = '/admin/usuarios/' + btn.dataset.userId + '/estructuras';
   document.getElementById('new-estructura-form').reset();
   document.getElementById('new-estructura-dialog').showModal();
+}
+function openEditEstructura(btn) {
+  const d = btn.dataset;
+  document.getElementById('edit-estructura-nombre').value = d.nombre;
+  document.getElementById('edit-estructura-tipo').value = d.tipo;
+  document.getElementById('edit-estructura-codigo').value = d.codigo;
+  document.getElementById('edit-estructura-form').action = '/admin/usuarios/' + d.userId + '/estructuras/' + d.assetId + '/edit';
+  document.getElementById('edit-estructura-dialog').showModal();
+}
+function deleteEstructura(btn) {
+  if (!confirm('¿Eliminar este activo?')) return;
+  const form = document.createElement('form');
+  form.method = 'post';
+  form.action = '/admin/usuarios/' + btn.dataset.userId + '/estructuras/' + btn.dataset.assetId + '/delete';
+  const tipoInput = document.createElement('input');
+  tipoInput.type = 'hidden';
+  tipoInput.name = 'tipo';
+  tipoInput.value = '{{ tipo }}';
+  form.appendChild(tipoInput);
+  document.body.appendChild(form);
+  form.submit();
 }
 function toggleEstructuras(btn, userId) {
   const el = document.getElementById('estructuras-' + userId);
