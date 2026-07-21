@@ -119,6 +119,25 @@ function applyFilters() {
   updateCounts();
 }
 
+function ensureNotifyButton(card, newStatus) {
+  const existing = card.querySelector('.kc-actions');
+  if (newStatus === 'done') {
+    if (!existing) {
+      const wrap = document.createElement('div');
+      wrap.className = 'kc-actions';
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-notify-ticket';
+      btn.innerHTML = '<i class="ti ti-send"></i> Enviar notificación';
+      btn.onclick = () => maybeNotify(card);
+      wrap.appendChild(btn);
+      card.appendChild(wrap);
+    }
+  } else if (existing) {
+    existing.remove();
+  }
+}
+
 function updateStatus(card, newStatus, oldZone) {
   fetch('/admin/tickets/' + card.dataset.id + '/status', {
     method: 'POST',
@@ -174,6 +193,7 @@ document.querySelectorAll('.kanban-cards').forEach(zone => {
     zone.appendChild(card);
     updateCounts();
     updateStatus(card, newStatus, oldZone);
+    ensureNotifyButton(card, newStatus);
 
     if (oldStatus === 'progress' && newStatus === 'done') {
       maybeNotify(card);
