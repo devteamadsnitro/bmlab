@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portal de Incidencias Meta</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<link rel="stylesheet" href="/static/style.css?v={{ asset_version }}" />
+</head>
+<body>
+<div class="success-wrap">
+  <div class="success-icon" style="background: var({{ '--bg-danger' if is_error else '--bg-success' }});">
+    <i class="ti {{ icon }}" style="color: var({{ '--text-danger' if is_error else '--text-success' }});"></i>
+  </div>
+  <div class="success-title">{{ title }}</div>
+  <div class="success-body">{{ message }}</div>
+</div>
+</body>
+</html>

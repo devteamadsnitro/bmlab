@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 from .database import DATABASE_URL, get_session, init_db
 from .mailer import send_ticket_resolved_email
 from .models import Asset, Ticket, User
-from .security import decrypt_password, encrypt_password, verify_password
+from .security import decrypt_password, encrypt_password, verify_advance_token, verify_password
 from .seed import seed
 from .telegram import send_ticket_notification
 
@@ -239,6 +239,58 @@ async def admin_notify_ticket_resolved(
 
     await send_ticket_resolved_email(owner.email, owner.name, ticket.code)
     return {"ok": True}
+
+
+@app.get("/t/advance/{token}")
+def advance_ticket_via_link(token: str, request: Request, session: Session = Depends(get_session)):
+    ticket_id = verify_advance_token(token)
+    if ticket_id is None:
+        return templates.TemplateResponse(
+            "ticket_action.html",
+            {
+                "request": request,
+                "is_error": True,
+                "icon": "ti-alert-circle",
+                "title": "Enlace inválido",
+                "message": "Este enlace no es válido.",
+            },
+            status_code=400,
+        )
+
+    ticket = session.get(Ticket, ticket_id)
+    if not ticket:
+        return templates.TemplateResponse(
+            "ticket_action.html",
+            {
+                "request": request,
+                "is_error": True,
+                "icon": "ti-alert-circle",
+                "title": "Ticket no encontrado",
+                "message": "No se encontró el ticket asociado a este enlace.",
+            },
+            status_code=404,
+        )
+
+    if ticket.status == "open":
+        ticket.status = "progress"
+        session.add(ticket)
+        session.commit()
+        message = f"El ticket {ticket.code} se movió a En proceso."
+    elif ticket.status == "progress":
+        message = f"El ticket {ticket.code} ya está En proceso."
+    else:
+        message = f"El ticket {ticket.code} ya está Resuelto."
+
+    return templates.TemplateResponse(
+        "ticket_action.html",
+        {
+            "request": request,
+            "is_error": False,
+            "icon": "ti-circle-check",
+            "title": "Listo",
+            "message": message,
+        },
+    )
 
 
 def _usuarios_context(request: Request, user: User, session: Session, tipo: str, **extra):
