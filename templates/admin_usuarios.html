@@ -91,7 +91,7 @@
     <input type="hidden" name="tipo" value="{{ tipo }}" />
     <div class="dialog-title">Nuevo {{ "administrador" if tipo == "administradores" else "cliente" }}</div>
     <div class="field"><label>Nombre</label><input type="text" name="nombre" value="{{ form_nombre or '' }}" required /></div>
-    <div class="field"><label>Cuenta</label><input type="email" name="cuenta" value="{{ form_cuenta or '' }}" required /></div>
+    <div class="field"><label>Cuenta</label><input type="text" name="cuenta" value="{{ form_cuenta or '' }}" required /></div>
     <div class="field"><label>Contraseña</label><input type="text" name="password" required /></div>
     <div class="field"><label>Email</label><input type="email" name="email" value="{{ form_email or '' }}" placeholder="opcional" /></div>
     <div class="dialog-actions">
@@ -106,7 +106,7 @@
     <input type="hidden" name="tipo" id="edit-user-tipo" value="{{ tipo }}" />
     <div class="dialog-title">Editar usuario</div>
     <div class="field"><label>Nombre</label><input type="text" name="nombre" id="edit-nombre" required /></div>
-    <div class="field"><label>Cuenta</label><input type="email" name="cuenta" id="edit-cuenta" required /></div>
+    <div class="field"><label>Cuenta</label><input type="text" name="cuenta" id="edit-cuenta" required /></div>
     <div class="field"><label>Contraseña</label><input type="text" name="password" id="edit-password" required /></div>
     <div class="field"><label>Email</label><input type="email" name="email" id="edit-email" placeholder="opcional" /></div>
     <div class="dialog-actions">
