@@ -257,12 +257,16 @@ async def admin_notify_ticket_resolved(
     ticket = session.get(Ticket, ticket_id)
     if not ticket:
         raise HTTPException(status_code=404)
+    if ticket.status != "done":
+        raise HTTPException(status_code=400, detail="El ticket todavía no está resuelto.")
 
     owner = session.get(User, ticket.user_id)
     if not owner or not owner.email:
         raise HTTPException(status_code=400, detail="El cliente no tiene un email registrado.")
 
-    await send_ticket_resolved_email(owner.email, owner.name, ticket.code)
+    sent = await send_ticket_resolved_email(owner.email, owner.name, ticket.code)
+    if not sent:
+        raise HTTPException(status_code=501, detail="El envío de emails aún no está configurado.")
     return {"ok": True}
 
 

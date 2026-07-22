@@ -151,7 +151,13 @@ function updateStatus(card, newStatus, oldZone) {
 function showActivos(btn) {
   const items = JSON.parse(btn.dataset.items);
   const list = document.getElementById('activos-list');
-  list.innerHTML = items.map(i => '<div class="activos-popup-item">' + i.asset_label + ' · ' + i.asset_external_id + '</div>').join('');
+  list.innerHTML = '';
+  items.forEach(i => {
+    const row = document.createElement('div');
+    row.className = 'activos-popup-item';
+    row.textContent = i.asset_label + ' · ' + i.asset_external_id;
+    list.appendChild(row);
+  });
   document.getElementById('activos-dialog').showModal();
 }
 
@@ -165,8 +171,12 @@ function maybeNotify(card) {
   document.getElementById('notify-text').textContent =
     '¿Quieres enviar notificación al cliente ' + client + ' a ' + email + '?';
   document.getElementById('notify-yes').onclick = () => {
-    fetch('/admin/tickets/' + card.dataset.id + '/notify', { method: 'POST' });
     document.getElementById('notify-dialog').close();
+    fetch('/admin/tickets/' + card.dataset.id + '/notify', { method: 'POST' })
+      .then(r => {
+        if (!r.ok) return r.json().then(data => { throw new Error(data.detail || 'No se pudo enviar la notificación.'); });
+      })
+      .catch(err => alert(err.message));
   };
   document.getElementById('notify-no').onclick = () => {
     document.getElementById('notify-dialog').close();
